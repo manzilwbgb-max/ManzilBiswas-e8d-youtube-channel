@@ -315,19 +315,23 @@ _free_next = [0.0]
 
 
 def pollinations(prompt, out_path, w, h, seed):
-    """Free AI picture (Flux via pollinations.ai). Crops a strip off the bottom in case a logo is stamped there."""
+    """Free AI picture (Flux via pollinations.ai). Without a token the service allows about one picture every
+    15 seconds and may stamp a small logo, so a strip is cropped off the bottom. A free token removes both."""
     import time
     import urllib.parse
     from .util import http
-    base = os.environ.get("POLLINATIONS_BASE", "https://image.pollinations.ai").rstrip("/")
+    tok = os.environ.get("POLLINATIONS_TOKEN", "").strip()
     th = int(h * 1.06)
-    url = (f"{base}/prompt/" + urllib.parse.quote(prompt[:900]) +
-           f"?width={w}&height={th}&seed={seed}&model=flux&nologo=true&safe=true")
-    headers = {}
-    if os.environ.get("POLLINATIONS_TOKEN"):
-        headers["Authorization"] = "Bearer " + os.environ["POLLINATIONS_TOKEN"]
-    gap = float(os.environ.get("POLLINATIONS_GAP", "2" if headers else "8"))
-    with _free_lock:  # the free service allows one request at a time
+    q = urllib.parse.quote(prompt[:900])
+    if tok.startswith(("sk_", "pk_")):  # key from enter.pollinations.ai (new gateway)
+        base = os.environ.get("POLLINATIONS_GEN_BASE", "https://gen.pollinations.ai").rstrip("/")
+        url = f"{base}/image/{q}?width={w}&height={th}&seed={seed}&model=flux&nologo=true&safe=true"
+    else:  # classic free endpoint (token from auth.pollinations.ai is optional)
+        base = os.environ.get("POLLINATIONS_BASE", "https://image.pollinations.ai").rstrip("/")
+        url = f"{base}/prompt/{q}?width={w}&height={th}&seed={seed}&model=flux&nologo=true&safe=true"
+    headers = {"Authorization": "Bearer " + tok} if tok else {}
+    gap = float(os.environ.get("POLLINATIONS_GAP", "2" if tok else "16"))
+    with _free_lock:  # one request at a time, spaced out
         wait = _free_next[0] - time.time()
         if wait > 0:
             time.sleep(wait)

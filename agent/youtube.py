@@ -5,7 +5,7 @@ import time
 
 import requests
 
-from .util import http, log
+from .util import http, log, mask
 
 API = os.environ.get("YT_API_BASE", "https://www.googleapis.com/youtube/v3")
 UP = os.environ.get("YT_UPLOAD_BASE", "https://www.googleapis.com/upload/youtube/v3")
@@ -26,6 +26,7 @@ def token():
     if r.status_code != 200:
         raise RuntimeError("YouTube sign-in failed (check the three YT_ secrets): " + r.text[:300])
     j = r.json()
+    mask(j["access_token"])
     _tok.update(v=j["access_token"], exp=time.time() + int(j.get("expires_in", 3600)))
     return _tok["v"]
 
@@ -63,6 +64,7 @@ def upload(path, title, description, tags, privacy="private", publish_at=None, c
     if r.status_code != 200:
         raise RuntimeError("YouTube refused the upload: " + r.text[:400])
     url, offset = r.headers["Location"], 0
+    mask(url)
     for attempt in range(5):
         try:
             with open(path, "rb") as f:

@@ -82,7 +82,8 @@ From then on everything runs on its own (times in IST):
 | `VOICE` | `auto`, `gemini`, `free` | `auto` |
 | `TEXT_MODEL`, `TTS_MODEL`, `IMAGE_MODEL` | pin a Gemini model; empty = newest Flash model the key can use | empty |
 
-Secret `POLLINATIONS_TOKEN` (optional): a free token from pollinations.ai makes free AI pictures faster.
+Secret `POLLINATIONS_TOKEN` (optional): without it, free AI pictures come one every ~15 seconds and may carry a small
+logo (the agent crops the bottom edge). A free account at https://auth.pollinations.ai gives a token that removes both.
 
 ## 7. Music (optional, recommended)
 
@@ -96,6 +97,9 @@ See `music/README.md` — drop a few tracks from the YouTube Audio Library into 
   Short's *Related video*. Do both in YouTube Studio — link each Short to the newest movie.
 - **Custom thumbnails** need a phone-verified channel: verify once at https://www.youtube.com/verify.
 - **AI label:** every upload is marked "altered or synthetic content" and the description says what is AI-made.
-- **GitHub minutes:** a private repo has 2,000 free Actions minutes a month; this setup uses roughly 1,200–1,500.
-  If you run out, make the approvals run every 2 hours (`cron: "7 1-18/2 * * *"` in `approvals.yml`).
+- **Public or private repo:** in a *public* repo, Actions minutes are free and unlimited, but anyone can read the code,
+  the plan, the agent's memory (`state/`) and the run logs. Secrets and the videos waiting for approval stay hidden either way.
+  In a *private* repo only you see everything, within 2,000 free minutes a month (this setup uses roughly 1,200–1,500;
+  if you run short, make approvals run every 2 hours: `cron: "7 1-18/2 * * *"` in `approvals.yml`).
+  Change it in Settings → General → Danger Zone → Change visibility.
 - **Something failed?** The bot tells you. Details: Actions → the red run → open the step.

@@ -132,3 +132,9 @@ def drop(sub, name):
 
 def words(text):
     return len(re.findall(r"[A-Za-z0-9']+", text or ""))
+
+
+def mask(value):
+    """Hide a value in GitHub Actions logs (secrets are hidden automatically; this is for tokens made at run time)."""
+    if value and os.environ.get("GITHUB_ACTIONS") == "true":
+        print(f"::add-mask::{value}", flush=True)

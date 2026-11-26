@@ -30,18 +30,27 @@ def _piper_model():
     return os.path.join(d, name + ".onnx")
 
 
+def _piper_class(name):
+    try:
+        return getattr(__import__("piper", fromlist=[name]), name)
+    except (ImportError, AttributeError):
+        return getattr(__import__("piper.voice", fromlist=[name]), name)  # raises ImportError if piper is missing
+
+
 def piper(text, out_wav):
     if "v" not in _piper:
-        from piper import PiperVoice  # pip install piper-tts
-        _piper["v"] = PiperVoice.load(_piper_model())
+        _piper["v"] = _piper_class("PiperVoice").load(_piper_model())  # pip install piper-tts
         log("free voice ready:", PIPER_VOICE)
     v, pace = _piper["v"], float(os.environ.get("PIPER_PACE", "1.08"))
     with wave.open(out_wav, "wb") as wf:
         if hasattr(v, "synthesize_wav"):  # piper-tts 1.3+
             try:
-                from piper import SynthesisConfig
-                v.synthesize_wav(text, wf, syn_config=SynthesisConfig(length_scale=pace))
-            except ImportError:
+                cfg = _piper_class("SynthesisConfig")(length_scale=pace)
+            except (ImportError, AttributeError, TypeError):
+                cfg = None
+            if cfg is not None:
+                v.synthesize_wav(text, wf, syn_config=cfg)
+            else:
                 v.synthesize_wav(text, wf)
         else:  # piper-tts 1.2
             v.synthesize(text, wf, length_scale=pace)
