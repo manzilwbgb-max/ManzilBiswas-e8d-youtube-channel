@@ -1,0 +1,35 @@
+name: Check setup
+# Run this after adding the secrets: it tests Gemini, YouTube, Telegram and the free voice, and tells you what's missing.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install tools
+        run: |
+          pip install -q -r requirements.txt
+          pip install -q piper-tts || echo "free voice engine not installed"
+      - name: Check
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          TEXT_MODEL: ${{ vars.TEXT_MODEL }}
+          TTS_MODEL: ${{ vars.TTS_MODEL }}
+          IMAGE_MODEL: ${{ vars.IMAGE_MODEL }}
+        run: python -m agent.main check

@@ -1,0 +1,42 @@
+name: Approvals (Telegram)
+# Every hour from 06:37 to 23:37 IST: reads your Telegram taps and messages, then publishes, schedules or discards.
+on:
+  schedule:
+    - cron: "7 1-18 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: approvals
+  cancel-in-progress: false
+jobs:
+  approvals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install tools
+        run: pip install -q -r requirements.txt
+      - name: Read Telegram and act
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          TEXT_MODEL: ${{ vars.TEXT_MODEL }}
+          TTS_MODEL: ${{ vars.TTS_MODEL }}
+          IMAGE_MODEL: ${{ vars.IMAGE_MODEL }}
+        run: python -m agent.main approvals
+      - name: Save the agent's memory
+        if: always()
+        run: bash scripts/save_state.sh "Approvals run ${{ github.run_number }}"

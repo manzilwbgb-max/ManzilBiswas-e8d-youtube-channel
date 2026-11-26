@@ -1,0 +1,100 @@
+# One-time setup (about 30–40 minutes)
+
+You'll create 6 secrets in this GitHub repo: **Settings → Secrets and variables → Actions → New repository secret**.
+Never paste these keys into a chat, an issue or a file.
+
+| Secret | What it is |
+|---|---|
+| `TELEGRAM_BOT_TOKEN` | your Telegram bot's token (step 1) |
+| `TELEGRAM_CHAT_ID` | your own Telegram chat id (step 1) |
+| `GEMINI_API_KEY` | Gemini API key (step 2) |
+| `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN` | permission to post on your channel (step 3) |
+
+A computer browser is easiest for step 3; the rest works from a phone.
+
+## 1. Telegram bot (5 min)
+
+1. In Telegram open **@BotFather** → send `/newbot` → name it (e.g. *History with Me Agent*) →
+   pick a username ending in `bot`. BotFather replies with a **token** → save it as the secret `TELEGRAM_BOT_TOKEN`.
+2. Open your new bot and send it any message (e.g. `hi`).
+3. In GitHub: **Actions → Check setup → Run workflow**. The bot replies with your chat id →
+   save it as the secret `TELEGRAM_CHAT_ID`. (Only messages from this chat are obeyed.)
+
+## 2. Gemini API key (3 min)
+
+1. Open https://aistudio.google.com/apikey → **Create API key** → save it as `GEMINI_API_KEY`.
+   The free tier is enough for the agent's brain and, while its quota lasts, the voice.
+2. Optional, for Gemini AI pictures and Veo motion: in AI Studio, **set up billing** on the key's project.
+   Your Gemini (Google AI Pro) app subscription doesn't pay for API calls by itself, but Google AI Pro can come with
+   monthly Google Cloud credits you can claim in AI Studio and spend on the Gemini API (availability varies by country).
+   Set a budget alert in Google Cloud Billing.
+
+## 3. YouTube permission (15 min, computer recommended)
+
+1. https://console.cloud.google.com → create a project, e.g. *History with Me Agent*.
+2. **APIs & Services → Library** → enable **YouTube Data API v3** and **YouTube Analytics API**.
+3. **Google Auth Platform** (OAuth consent screen): user type **External**, app name, your email.
+   Under **Audience**, add your Gmail as a test user, then press **Publish app** (status *In production*).
+   This matters: in *Testing* status the permission expires every 7 days. Google will show an
+   "unverified app" warning when you sign in — that's expected for your own private app (Advanced → continue).
+4. **Clients / Credentials → Create OAuth client ID** → type **Web application** →
+   Authorized redirect URI: `https://developers.google.com/oauthplayground` → create →
+   save the **Client ID** as `YT_CLIENT_ID` and the **Client secret** as `YT_CLIENT_SECRET`.
+5. Open https://developers.google.com/oauthplayground → ⚙️ (top right) → tick **Use your own OAuth credentials** →
+   paste the client ID and secret.
+6. In "Input your own scopes" paste (one line):
+   `https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/yt-analytics.readonly`
+   → **Authorize APIs** → sign in with the Google account that owns the channel → **choose the History with Me channel**
+   → allow.
+7. **Exchange authorization code for tokens** → copy the **Refresh token** → save it as `YT_REFRESH_TOKEN`.
+
+## 4. Check everything
+
+**Actions → Check setup → Run workflow.** It tests Gemini, YouTube (channel name, subscribers, watch hours),
+Telegram and the free voice, and lists anything missing. Your bot says *"History with Me agent is connected"*.
+
+## 5. First test run
+
+**Actions → Make Shorts → Run workflow**, tick **Test only** → in about 10 minutes the preview arrives on Telegram
+(nothing is kept or uploaded). Then run it again without *Test only*, tap **✅ Publish now** under the preview,
+and within an hour the Short is live. You can also start **Approvals (Telegram)** by hand to act at once.
+
+From then on everything runs on its own (times in IST):
+
+| Workflow | When |
+|---|---|
+| Make Shorts (story + loop) | every day 06:11 |
+| Make history movie | Wednesday and Sunday 05:53 |
+| Approvals (Telegram) | every hour 06:37–23:37 |
+| Weekly report | Monday 08:47 |
+
+"Best time" publishes at 19:00 (story), 12:30 (loop) and 18:30 (movie) — change these in `data/plan.json`.
+
+## 6. Optional settings (Settings → Secrets and variables → Actions → **Variables**)
+
+| Variable | Values | Default |
+|---|---|---|
+| `PICTURES` | `auto` (Gemini AI if billing works, else free AI; real archive photos for real events), `free`, `archive`, `gemini` | `auto` |
+| `MOVIE_PICTURES` | same, for movies only (set `free` to keep costs low) | `PICTURES` |
+| `SHORTS_AI_PICTURES_MAX` / `MOVIE_AI_PICTURES_MAX` | most paid AI pictures per video (0 = no limit); the rest are free | `0` / `30` |
+| `MOTION` / `MOVIE_MOTION` | opening scenes animated with Veo AI video (needs billing, billed per second) | `0` |
+| `VOICE` | `auto`, `gemini`, `free` | `auto` |
+| `TEXT_MODEL`, `TTS_MODEL`, `IMAGE_MODEL` | pin a Gemini model; empty = newest Flash model the key can use | empty |
+
+Secret `POLLINATIONS_TOKEN` (optional): a free token from pollinations.ai makes free AI pictures faster.
+
+## 7. Music (optional, recommended)
+
+See `music/README.md` — drop a few tracks from the YouTube Audio Library into `music/`.
+
+## Good to know
+
+- **Approval first:** finished videos wait as private files in a *draft release* of this repo (Code → Releases).
+  Nothing goes to YouTube until you tap. Discarded or uploaded videos are removed from there.
+- **Two things YouTube's API can't do** (the agent reminds you): pinning the comment it posts, and setting a
+  Short's *Related video*. Do both in YouTube Studio — link each Short to the newest movie.
+- **Custom thumbnails** need a phone-verified channel: verify once at https://www.youtube.com/verify.
+- **AI label:** every upload is marked "altered or synthetic content" and the description says what is AI-made.
+- **GitHub minutes:** a private repo has 2,000 free Actions minutes a month; this setup uses roughly 1,200–1,500.
+  If you run out, make the approvals run every 2 hours (`cron: "7 1-18/2 * * *"` in `approvals.yml`).
+- **Something failed?** The bot tells you. Details: Actions → the red run → open the step.

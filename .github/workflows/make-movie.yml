@@ -1,0 +1,72 @@
+name: Make history movie
+# Wednesday and Sunday mornings: one 15-minute history movie, sent to you on Telegram for approval.
+on:
+  schedule:
+    - cron: "23 0 * * 0,3"   # 05:53 IST on Sunday and Wednesday
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Topic (leave empty and the strategist chooses)"
+        required: false
+        default: ""
+      pictures:
+        description: "Pictures (auto = Gemini AI if billing is on, else free AI, plus real archive photos)"
+        type: choice
+        options: [auto, free, archive, gemini]
+        default: auto
+      motion:
+        description: "Scenes animated with Veo AI video (needs Gemini billing; 0 = off)"
+        type: choice
+        options: ["0", "2", "4"]
+        default: "0"
+      dry_run:
+        description: "Test only (send to Telegram, don't keep or upload)"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: make-movie
+  cancel-in-progress: false
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core > /dev/null
+          pip install -q -r requirements.txt
+          pip install -q piper-tts || echo "free voice engine not installed"
+      - name: Make the movie
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          TEXT_MODEL: ${{ vars.TEXT_MODEL }}
+          TTS_MODEL: ${{ vars.TTS_MODEL }}
+          IMAGE_MODEL: ${{ vars.IMAGE_MODEL }}
+          POLLINATIONS_TOKEN: ${{ secrets.POLLINATIONS_TOKEN }}
+          PICTURES: ${{ inputs.pictures || vars.MOVIE_PICTURES || vars.PICTURES || 'auto' }}
+          AI_PICTURES_MAX: ${{ vars.MOVIE_AI_PICTURES_MAX || '30' }}
+          MOTION: ${{ inputs.motion || vars.MOVIE_MOTION || '0' }}
+          VOICE: ${{ vars.VOICE || 'auto' }}
+          MUSIC: ${{ vars.MUSIC || 'on' }}
+          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          TOPIC: ${{ inputs.topic }}
+        run: python -m agent.main make --kind movie --topic "$TOPIC"
+      - name: Save the agent's memory
+        if: always()
+        run: bash scripts/save_state.sh "Movie run ${{ github.run_number }}"
