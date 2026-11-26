@@ -56,6 +56,27 @@ FORMATS = {
 }
 LENGTH = {"story": (55, 88, 5, 8), "loop": (12, 28, 2, 4)}  # words lo/hi, scenes lo/hi
 
+# Cinematic AI-video formats: real moving shots with natural sound, not pictures.
+CINE_FORMATS = {
+    "pov": "first-person POV: the camera is the viewer's own eyes inside the moment, their hands visible doing "
+           "period-accurate things; narration in second person, present tense ('You wake up to...'); never show their face",
+    "trailer": "a movie-trailer micro-film: epic establishing shot, rising tension, one shocking reveal, a deep trailer voice",
+    "timetraveler": "a modern time-traveller vlogs from inside the moment, talking to a handheld selfie camera in short, "
+                    "excited lines; the same person in every shot",
+}
+CINE_LENGTH = {"story": (45, 80, 4, 6, 20, 32), "loop": (12, 24, 1, 2, 6, 10)}  # words, shots, seconds
+
+
+def cinematic_mode():
+    return os.environ.get("CINEMATIC", "auto").lower() not in ("off", "0", "no")
+
+
+def formats_for(kind):
+    if kind == "story" and cinematic_mode():
+        allowed = [f.strip() for f in os.environ.get("CINE_FORMATS", "pov,trailer").split(",") if f.strip() in CINE_FORMATS]
+        return {f: CINE_FORMATS[f] for f in allowed or ["pov"]}
+    return FORMATS[kind]
+
 
 # ------------------------------------------------------------------ helpers
 
@@ -206,7 +227,7 @@ OUR RECENT VIDEOS (avoid repeating topics, openings and formats):
 SERIES:
 {chr(10).join(f"- {s['name']}: {s['about']}" for s in p['series'])}
 FORMATS (pick one not used in the last 3 {kind}s: {", ".join(f for f in recent_formats if f) or "none"}):
-{chr(10).join(f"- {k}: {v}" for k, v in FORMATS[kind].items())}
+{chr(10).join(f"- {k}: {v}" for k, v in formats_for(kind).items())}
 Return JSON: {{"choice": candidate number or -1 for a new trend-led topic, "topic": "...", "angle": "the specific surprising take",
 "series": "exact series name", "format": "exact format name", "wiki": ["best English Wikipedia article title", "optional second"],
 "why": "one line: why this will perform now", "trend_ref": "title of the trend that inspired it, or empty"}}""",
@@ -229,8 +250,9 @@ Return JSON: {{"choice": candidate number or -1 for a new trend-led topic, "topi
         idea["wiki"] = [w for w in j["wiki"] if w][:3] or idea.get("wiki")
     idea.setdefault("angle", "")
     idea["series"] = series_of(idea.get("series"), p)["name"]
-    if idea.get("format") not in FORMATS[kind]:
-        idea["format"] = next((f for f in FORMATS[kind] if f not in recent_formats), next(iter(FORMATS[kind])))
+    fm = formats_for(kind)
+    if idea.get("format") not in fm:
+        idea["format"] = next((f for f in fm if f not in recent_formats), next(iter(fm)))
     idea.setdefault("wiki", [idea["topic"]])
     if isinstance(idea["wiki"], str):
         idea["wiki"] = [idea["wiki"]]
@@ -449,6 +471,85 @@ Return JSON: {{"scenes": [{{"narration": "...", "image_prompt": "16:9 cinematic 
                                               if c in order else 1, default="unchecked")}
     log(f"movie script: {len(scenes)} scenes, {sum(words(s['narration']) for s in scenes)} words")
     return script
+
+
+def write_cinematic(kind, idea, facts, recent, host_look=""):
+    """A shot list for real AI video: each shot is a camera direction with natural sound, plus the voiceover."""
+    wlo, whi, slo, shi, tlo, thi = CINE_LENGTH[kind]
+    fmt = idea["format"] if kind == "story" else "loop"
+    desc = CINE_FORMATS.get(fmt, "one or two breathtaking shots that show the fact itself, with a voiceover that loops")
+    talk = fmt == "timetraveler"
+    ending = ("The final words must run straight back into the first words so the clip loops seamlessly." if kind == "loop"
+              else "End on a twist or a haunting final fact that makes people rewatch or comment.")
+    prompt = f"""{PLAYBOOK}
+
+TASK: cine_{kind}
+You are also the director. Write a cinematic AI-video YouTube Short, shot by shot, for a video model that generates
+photorealistic 3-10 second shots with natural sound.
+TOPIC: {idea['topic']}
+ANGLE: {idea.get('angle') or 'the most gripping true angle'}
+SERIES: {idea['series']}
+FORMAT: {fmt} - {desc}
+OUR RECENT VIDEOS (vary the opening):
+{_recent_lines(recent)}
+{_source_block(facts)}
+
+Rules
+- {slo}-{shi} shots, {tlo}-{thi} seconds in total. Shot 1 is the most striking moment of the whole story (start in the
+  middle of the action), readable in a split second.
+- Each shot's "visual" is a camera direction: shot type and camera move (for example "first-person POV, handheld, looking
+  down at my hands", "low-angle tracking shot", "slow push-in"), the subject and ONE clear action, period-accurate clothes,
+  tools and architecture for the exact year and place, lighting, weather, mood, and the natural sounds heard
+  (ambience, footsteps, crowd, fire, wind). No text, captions or logos in the picture.
+- Describe the main character's look the same way in every shot so they stay the same person{(': ' + host_look) if talk and host_look else ''}.
+{'- The vlogger speaks to the camera: put their words in "dialogue" (at most 12 words per shot) and leave "voiceover" empty.' if talk else '- Narration goes in "voiceover" (about 2.5 words per second of the shot); write "no dialogue" into every visual.'}
+- {wlo}-{whi} spoken words in total. Never graphic: show danger and tragedy through faces, sound and aftermath.
+- {ending}
+Return JSON: {{"title": "max 60 characters, keyword early, curiosity without lying",
+"hook_text": "on-screen text for the first 3 seconds, max 45 characters (e.g. POV: You're a Pompeii baker, 79 AD)",
+"shots": [{{"seconds": 4, "visual": "...", "voiceover": "...", "dialogue": "", "archive_query": "2-5 words for a real photo if one exists"}}],
+"description": "2-3 sentences adding one fact not in the video",
+"tags": ["10-15 search tags"], "hashtags": ["#history", "#shorts", "one topic hashtag"],
+"pinned_comment": "a question viewers want to answer"}}"""
+    j = gemini.text_json(prompt, temperature=0.9)
+    shots = []
+    for sh in j.get("shots") or []:
+        if not isinstance(sh, dict) or not str(sh.get("visual", "")).strip():
+            continue
+        shots.append({"seconds": min(max(float(sh.get("seconds") or 5), 3), 10),
+                      "visual": re.sub(r"\s+", " ", str(sh["visual"])).strip(),
+                      "voiceover": re.sub(r"\s+", " ", str(sh.get("voiceover") or "")).strip(),
+                      "dialogue": re.sub(r"\s+", " ", str(sh.get("dialogue") or "")).strip(),
+                      "archive_query": str(sh.get("archive_query") or idea["topic"])[:80]})
+    if not shots:
+        raise RuntimeError("the director returned no shots")
+    # the same strict fact check as every other script, run on what is said
+    said = [{"narration": x["voiceover"] or x["dialogue"] or "(no words)", "image_prompt": x["visual"],
+             "archive_query": x["archive_query"], "visual": "ai"} for x in shots]
+    checked = fact_check({"title": j.get("title", ""), "topic": idea["topic"], "scenes": said}, facts, f"cinematic {kind}")
+    if len(checked["scenes"]) == len(shots):
+        for x, c in zip(shots, checked["scenes"]):
+            words_ = "" if c["narration"] == "(no words)" else c["narration"]
+            if x["dialogue"] and not x["voiceover"]:
+                x["dialogue"] = words_
+            else:
+                x["voiceover"] = words_
+            x["visual"] = c["image_prompt"] or x["visual"]
+    script = dict(j, topic=idea["topic"], shots=shots, format=fmt, fact_check=checked.get("fact_check", {}))
+    script["title"] = _cut(checked.get("title") or j.get("title") or idea["topic"], 70)
+    script["scenes"] = [{"narration": x["voiceover"] or x["dialogue"], "image_prompt": x["visual"],
+                         "archive_query": x["archive_query"], "visual": "ai"} for x in shots]
+    return script
+
+
+def cine_spec(kind, script, idea, p=None, pictures=None, host=None):
+    p = p or plan()
+    s = series_of(idea["series"], p)
+    return {"format": "short", "kind": kind, "shots": script["shots"], "hook": _cut(script.get("hook_text", ""), 48),
+            "voice": s.get("voice") or p["channel"].get("voice", "Charon"), "style": s.get("style") or p["channel"]["style"],
+            "pictures": pictures or os.environ.get("PICTURES", "auto") or "auto", "topic": idea["topic"],
+            "series": s["name"], "voice_engine": os.environ.get("VOICE", "auto") or "auto", "aspect": "9:16",
+            "host": host if script.get("format") == "timetraveler" else None}
 
 
 def write(kind, idea, facts, recent, trends):

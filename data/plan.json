@@ -1,229 +1,881 @@
 {
-  "channel": {
-    "name": "History with Me",
-    "handle": "@ManzilBiswas-e8d",
-    "voice": "Charon",
-    "voice_style": "Narrate like a gripping documentary storyteller: warm, deep and steady, with suspense in the pauses",
-    "style": "Cinematic historical film still, photorealistic, dramatic natural light, 35mm film grain, rich color grading, shallow depth of field",
-    "short_footer": "New history movies every Wednesday and Sunday on History with Me.",
-    "ai_note": "Narration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing."
+ "channel": {
+  "name": "History with Me",
+  "handle": "@ManzilBiswas-e8d",
+  "voice": "Charon",
+  "voice_style": "Narrate like a gripping documentary storyteller: warm, deep and steady, with suspense in the pauses",
+  "style": "Cinematic historical film still, photorealistic, dramatic natural light, 35mm film grain, rich color grading, shallow depth of field",
+  "short_footer": "New history movies every Wednesday and Sunday on History with Me.",
+  "ai_note": "Narration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing."
+ },
+ "publish_slots_ist": {
+  "story": "19:00",
+  "loop": "12:30",
+  "movie": "18:30"
+ },
+ "movie_words": 2250,
+ "default_series": "Timeline Twists",
+ "series": [
+  {
+   "name": "Prehistoric Giants",
+   "about": "dinosaurs, sea monsters, megafauna and early humans, grounded in real paleontology",
+   "style": "Photorealistic paleoart, nature-documentary cinematography, misty primeval landscape, scientifically accurate anatomy and scale",
+   "playlist": "Prehistoric Giants | History with Me",
+   "hashtags": [
+    "#prehistoric",
+    "#dinosaurs"
+   ],
+   "tags": [
+    "prehistoric animals",
+    "dinosaurs",
+    "paleontology"
+   ],
+   "app_line": ""
   },
-  "publish_slots_ist": {"story": "19:00", "loop": "12:30", "movie": "18:30"},
-  "movie_words": 2250,
-  "default_series": "Timeline Twists",
-  "series": [
-    {
-      "name": "Prehistoric Giants",
-      "about": "dinosaurs, sea monsters, megafauna and early humans, grounded in real paleontology",
-      "style": "Photorealistic paleoart, nature-documentary cinematography, misty primeval landscape, scientifically accurate anatomy and scale",
-      "playlist": "Prehistoric Giants | History with Me",
-      "hashtags": ["#prehistoric", "#dinosaurs"],
-      "tags": ["prehistoric animals", "dinosaurs", "paleontology"],
-      "app_line": ""
-    },
-    {
-      "name": "Timeline Twists",
-      "about": "famous moments with a twist most people never heard",
-      "style": "Cinematic historical film still, photorealistic, golden-hour light, 35mm film grain, period-accurate costumes and streets",
-      "playlist": "Timeline Twists | History with Me",
-      "hashtags": ["#historyfacts"],
-      "tags": ["history facts", "history stories"]
-    },
-    {
-      "name": "World War Stories",
-      "about": "human stories from the World Wars, told with respect, never glorifying violence",
-      "style": "1940s documentary film still, muted Kodachrome colors, heavy film grain, period-accurate uniforms, ships, aircraft and equipment",
-      "playlist": "World War Stories | History with Me",
-      "hashtags": ["#ww2", "#worldwar"],
-      "tags": ["world war 2", "ww2 history", "world war history"]
-    },
-    {
-      "name": "Dig Discoveries",
-      "about": "archaeology finds that rewrote what we thought we knew",
-      "style": "Archaeological discovery photography meets cinematic reconstruction, natural light, dust in the air, documentary realism",
-      "playlist": "Dig Discoveries | History with Me",
-      "hashtags": ["#archaeology"],
-      "tags": ["archaeology", "ancient history", "ancient discoveries"]
-    },
-    {
-      "name": "India's Genius",
-      "about": "the inventions, cities, scholars and rulers of ancient and medieval India",
-      "style": "Indian historical epic film still, warm golden light, richly detailed costumes, textiles and architecture of the exact era",
-      "playlist": "India's Genius | History with Me",
-      "hashtags": ["#indianhistory"],
-      "tags": ["indian history", "ancient india", "india history facts"]
-    },
-    {
-      "name": "Myth Busters",
-      "about": "popular history myths flipped with the real story and the evidence",
-      "style": "Moody chiaroscuro cinematic still, painterly light, historically accurate details, mysterious atmosphere",
-      "playlist": "History Myths Busted | History with Me",
-      "hashtags": ["#historymyths"],
-      "tags": ["history myths", "myths debunked", "history facts"]
-    }
-  ],
-  "ideas": [
-    {"id": "s01-quetzalcoatlus", "kind": "story", "date": "2026-11-27", "series": "Prehistoric Giants", "format": "one-number",
-     "topic": "Quetzalcoatlus, the flying reptile as tall as a giraffe",
-     "angle": "how something that big may have got off the ground: the vaulting launch idea, labelled as a hypothesis",
-     "wiki": ["Quetzalcoatlus"]},
-    {"id": "s02-napoleon-height", "kind": "story", "date": "2026-11-28", "series": "Myth Busters", "format": "myth-vs-fact",
-     "topic": "Napoleon was not short", "angle": "French inches, British cartoons and a nickname created the myth",
-     "wiki": ["Napoleon complex", "Napoleon"]},
-    {"id": "s03-rani-ki-vav", "kind": "story", "date": "2026-11-29", "series": "India's Genius", "format": "hidden-detail",
-     "topic": "Rani ki Vav, the upside-down temple built for water", "angle": "a queen's stepwell buried by floods for centuries",
-     "wiki": ["Rani ki vav"]},
-    {"id": "s04-terracotta-army", "kind": "story", "date": "2026-11-30", "series": "Dig Discoveries", "format": "timeline-twist",
-     "topic": "The Terracotta Army was found by farmers digging a well", "angle": "1974, a drought, a well - and thousands of soldiers underneath",
-     "wiki": ["Terracotta Army"]},
-    {"id": "s05-emu-war", "kind": "story", "date": "2026-12-01", "series": "Timeline Twists", "format": "timeline-twist",
-     "topic": "The Great Emu War of 1932", "angle": "soldiers with machine guns against flightless birds - and the birds won",
-     "wiki": ["Emu War"]},
-    {"id": "s06-napoleon-crown", "kind": "story", "date": "2026-12-02", "timely": true, "series": "Timeline Twists", "format": "myth-vs-fact",
-     "topic": "Napoleon crowned himself emperor (2 December 1804)", "angle": "the famous moment was planned in advance, not a snatch from the Pope",
-     "wiki": ["Coronation of Napoleon"]},
-    {"id": "s07-megalodon-teeth", "kind": "story", "date": "2026-12-03", "series": "Prehistoric Giants", "format": "one-number",
-     "topic": "Megalodon, the biggest shark that ever lived", "angle": "what its hand-sized teeth reveal, and why it vanished",
-     "wiki": ["Megalodon"]},
-    {"id": "s08-ghost-army", "kind": "story", "date": "2026-12-04", "series": "World War Stories", "format": "unsung-hero",
-     "topic": "The Ghost Army of World War II", "angle": "artists with inflatable tanks and fake radio traffic who fooled an army",
-     "wiki": ["Ghost Army"]},
-    {"id": "s09-antikythera", "kind": "story", "date": "2026-12-05", "series": "Dig Discoveries", "format": "mystery",
-     "topic": "The Antikythera mechanism, a 2,000-year-old computer", "angle": "sponge divers found gears that nobody could match for a thousand years",
-     "wiki": ["Antikythera mechanism"]},
-    {"id": "s10-halifax-explosion", "kind": "story", "date": "2026-12-06", "timely": true, "series": "Timeline Twists", "format": "you-are-there",
-     "topic": "The Halifax Explosion (6 December 1917)", "angle": "one collision in a harbour made the largest man-made blast before the atomic bomb; told with respect",
-     "wiki": ["Halifax Explosion"]},
-    {"id": "s11-pearl-harbor-radar", "kind": "story", "date": "2026-12-07", "timely": true, "series": "World War Stories", "format": "hidden-detail",
-     "topic": "Pearl Harbor, 85 years on: the radar warning nobody acted on", "angle": "two young radar operators saw the planes coming almost an hour early",
-     "wiki": ["Attack on Pearl Harbor", "Opana Radar Site"]},
-    {"id": "s12-zero", "kind": "story", "date": "2026-12-08", "series": "India's Genius", "format": "one-number",
-     "topic": "How India gave the world zero", "angle": "Brahmagupta wrote the rules for nothing - and changed all of mathematics",
-     "wiki": ["Brahmagupta", "0"]},
-    {"id": "s13-viking-helmets", "kind": "story", "date": "2026-12-09", "series": "Myth Busters", "format": "myth-vs-fact",
-     "topic": "Vikings never wore horned helmets", "angle": "the horns came from a 19th-century opera costume",
-     "wiki": ["Horned helmet", "Viking Age arms and armour"]},
-    {"id": "s14-nobel-obituary", "kind": "story", "date": "2026-12-10", "timely": true, "series": "Timeline Twists", "format": "timeline-twist",
-     "topic": "Alfred Nobel and the obituary that called him a merchant of death", "angle": "the story behind the first Nobel Prizes on 10 December 1901 (hedge the obituary legend)",
-     "wiki": ["Alfred Nobel", "Nobel Prize"]},
-    {"id": "s15-titanoboa", "kind": "story", "date": "2026-12-11", "series": "Prehistoric Giants", "format": "one-number",
-     "topic": "Titanoboa, a snake as long as a bus", "angle": "found in a coal mine, it tells us how hot the world was after the dinosaurs",
-     "wiki": ["Titanoboa"]},
-    {"id": "s16-delhi-durbar", "kind": "story", "date": "2026-12-12", "timely": true, "series": "India's Genius", "format": "timeline-twist",
-     "topic": "Delhi Durbar 1911: the day India's capital moved to Delhi", "angle": "a surprise announcement on 12 December 1911 that created New Delhi",
-     "wiki": ["Delhi Durbar", "New Delhi"]},
-    {"id": "s17-gobekli-tepe", "kind": "story", "date": "2026-12-13", "series": "Dig Discoveries", "format": "mystery",
-     "topic": "Gobekli Tepe, a temple older than farming", "angle": "built about 11,000 years ago, before writing, the wheel or farming villages",
-     "wiki": ["Göbekli Tepe"]},
-    {"id": "s18-amundsen", "kind": "story", "date": "2026-12-14", "timely": true, "series": "Timeline Twists", "format": "what-if",
-     "topic": "The race to the South Pole (14 December 1911)", "angle": "why Amundsen's dogs beat Scott's ponies and motor sledges",
-     "wiki": ["Amundsen's South Pole expedition"]},
-    {"id": "s19-wojtek", "kind": "story", "date": "2026-12-15", "series": "World War Stories", "format": "unsung-hero",
-     "topic": "Wojtek, the bear who served in the Polish army", "angle": "he carried ammunition at Monte Cassino and was enlisted as a private",
-     "wiki": ["Wojtek (bear)"]},
-    {"id": "s20-flat-earth", "kind": "story", "date": "2026-12-16", "series": "Myth Busters", "format": "myth-vs-fact",
-     "topic": "Medieval people did not think the Earth was flat", "angle": "the flat-Earth myth was invented in the 1800s",
-     "wiki": ["Myth of the flat Earth"]},
-    {"id": "s21-wright-flight", "kind": "story", "date": "2026-12-17", "timely": true, "series": "Timeline Twists", "format": "one-number",
-     "topic": "The first powered flight lasted 12 seconds (17 December 1903)", "angle": "12 seconds, 120 feet - and the world changed",
-     "wiki": ["Wright Flyer"]},
-    {"id": "s22-nalanda", "kind": "story", "date": "2026-12-18", "series": "India's Genius", "format": "what-if",
-     "topic": "Nalanda, the ancient university that drew scholars from across Asia", "angle": "what was lost when it fell (hedge the 'burned for months' legend)",
-     "wiki": ["Nalanda mahavihara"]},
-    {"id": "s23-mammoths-pyramids", "kind": "story", "date": "2026-12-19", "series": "Prehistoric Giants", "format": "timeline-twist",
-     "topic": "Woolly mammoths were still alive when the Great Pyramid was built", "angle": "the last mammoths on Wrangel Island",
-     "wiki": ["Woolly mammoth", "Wrangel Island"]},
-    {"id": "s24-pompeii-bread", "kind": "story", "date": "2026-12-20", "series": "Dig Discoveries", "format": "you-are-there",
-     "topic": "Pompeii's last loaf of bread", "angle": "a loaf still in the oven tells us about the town's final morning",
-     "wiki": ["Pompeii"]},
-    {"id": "s25-newgrange", "kind": "story", "date": "2026-12-21", "timely": true, "series": "Dig Discoveries", "format": "hidden-detail",
-     "topic": "Newgrange: a 5,000-year-old tomb that catches the winter solstice sunrise", "angle": "on the mornings around the winter solstice, sunlight creeps down the passage and lights the chamber for about 17 minutes",
-     "wiki": ["Newgrange"]},
-    {"id": "s26-cleopatra-greek", "kind": "story", "date": "2026-12-22", "series": "Myth Busters", "format": "myth-vs-fact",
-     "topic": "Cleopatra's family was Greek, not Egyptian", "angle": "her Greek-speaking dynasty ruled Egypt for almost 300 years - and she was said to be the first of them to learn Egyptian",
-     "wiki": ["Cleopatra", "Ptolemaic dynasty"]},
-    {"id": "s27-operation-mincemeat", "kind": "story", "date": "2026-12-23", "series": "World War Stories", "format": "unsung-hero",
-     "topic": "Operation Mincemeat: the fake officer who fooled Hitler", "angle": "a briefcase of forged letters redirected an army; told without graphic detail",
-     "wiki": ["Operation Mincemeat"]},
-    {"id": "s28-christmas-truce", "kind": "story", "date": "2026-12-24", "timely": true, "series": "World War Stories", "format": "you-are-there",
-     "topic": "The Christmas Truce of 1914", "angle": "enemy soldiers sang carols and met in no man's land",
-     "wiki": ["Christmas truce"]},
-    {"id": "s29-charlemagne", "kind": "story", "date": "2026-12-25", "timely": true, "series": "Timeline Twists", "format": "timeline-twist",
-     "topic": "Charlemagne was crowned emperor on Christmas Day in 800", "angle": "the coronation that revived the idea of a Roman emperor in the West",
-     "wiki": ["Charlemagne", "Coronation of Charlemagne"]},
-    {"id": "s30-iron-pillar", "kind": "story", "date": "2026-12-26", "series": "India's Genius", "format": "mystery",
-     "topic": "The Iron Pillar of Delhi, 1,600 years without rusting away", "angle": "what scientists found in its iron that protects it",
-     "wiki": ["Iron pillar of Delhi"]},
-
-    {"id": "l01-cleopatra-moon", "kind": "loop", "series": "Timeline Twists", "format": "time-gap",
-     "topic": "Cleopatra lived closer in time to the Moon landing than to the building of the Great Pyramid", "wiki": ["Cleopatra", "Great Pyramid of Giza"]},
-    {"id": "l02-sharks-trees", "kind": "loop", "series": "Prehistoric Giants", "format": "time-gap",
-     "topic": "Sharks are older than trees", "wiki": ["Shark", "Tree"]},
-    {"id": "l03-oxford-aztec", "kind": "loop", "series": "Timeline Twists", "format": "time-gap",
-     "topic": "Oxford University is older than the Aztec capital Tenochtitlan", "wiki": ["University of Oxford", "Tenochtitlan"]},
-    {"id": "l04-trex-stegosaurus", "kind": "loop", "series": "Prehistoric Giants", "format": "time-gap",
-     "topic": "Tyrannosaurus lived closer in time to you than to Stegosaurus", "wiki": ["Tyrannosaurus", "Stegosaurus"]},
-    {"id": "l05-shortest-war", "kind": "loop", "series": "Timeline Twists", "format": "scale",
-     "topic": "The shortest war in history lasted under an hour (Anglo-Zanzibar War, 1896)", "wiki": ["Anglo-Zanzibar War"]},
-    {"id": "l06-great-wall-space", "kind": "loop", "series": "Myth Busters", "format": "one-fact",
-     "topic": "You cannot see the Great Wall of China from space with the naked eye", "wiki": ["Great Wall of China"]},
-    {"id": "l07-everest-seafloor", "kind": "loop", "series": "Prehistoric Giants", "format": "one-fact",
-     "topic": "The top of Mount Everest is made of rock that formed on an ancient sea floor", "wiki": ["Mount Everest", "Qomolangma Formation"]},
-    {"id": "l08-eiffel-summer", "kind": "loop", "series": "Timeline Twists", "format": "scale",
-     "topic": "The Eiffel Tower grows taller in summer heat", "wiki": ["Eiffel Tower"]},
-    {"id": "l09-rome-printing", "kind": "loop", "series": "Timeline Twists", "format": "time-gap",
-     "topic": "The Roman Empire (in its eastern half) still existed when the printing press was invented", "wiki": ["Fall of Constantinople", "Printing press"]},
-    {"id": "l10-indus-drains", "kind": "loop", "series": "India's Genius", "format": "one-fact",
-     "topic": "Indus Valley cities had covered drains and private bathrooms 4,500 years ago", "wiki": ["Indus Valley Civilisation", "Mohenjo-daro"]},
-    {"id": "l11-chess-india", "kind": "loop", "series": "India's Genius", "format": "one-fact",
-     "topic": "Chess began in India as chaturanga", "wiki": ["Chaturanga"]},
-    {"id": "l12-pyramid-workers", "kind": "loop", "series": "Myth Busters", "format": "one-fact",
-     "topic": "The Giza pyramids were built by paid workers, not slaves", "wiki": ["Giza pyramid complex", "Egyptian pyramid construction techniques"]},
-    {"id": "l13-vikings-america", "kind": "loop", "series": "Timeline Twists", "format": "time-gap",
-     "topic": "Vikings reached America about 500 years before Columbus", "wiki": ["L'Anse aux Meadows"]},
-    {"id": "l14-first-speeding", "kind": "loop", "series": "Timeline Twists", "format": "scale",
-     "topic": "The first speeding fine was for driving at about 8 miles per hour (1896)", "wiki": ["Walter Arnold (motorist)"]},
-    {"id": "l15-dino-day", "kind": "loop", "series": "Prehistoric Giants", "format": "scale",
-     "topic": "When dinosaurs lived, a day on Earth was shorter than 24 hours", "wiki": ["Day length fluctuations", "Tidal acceleration"]},
-    {"id": "l16-stegosaurus-brain", "kind": "loop", "series": "Prehistoric Giants", "format": "scale",
-     "topic": "Stegosaurus had a tiny brain for its huge body", "wiki": ["Stegosaurus"]},
-    {"id": "l17-mammoth-ivory", "kind": "loop", "series": "Prehistoric Giants", "format": "scale",
-     "topic": "Mammoth tusks could grow more than four metres long", "wiki": ["Woolly mammoth"]},
-    {"id": "l18-colosseum-water", "kind": "loop", "series": "Timeline Twists", "format": "one-fact",
-     "topic": "Romans may have flooded the Colosseum for mock sea battles", "wiki": ["Colosseum", "Naumachia"]},
-    {"id": "l19-ashoka-pillars", "kind": "loop", "series": "India's Genius", "format": "one-fact",
-     "topic": "India's national emblem comes from a pillar carved 2,200 years ago", "wiki": ["Lion Capital of Ashoka"]},
-    {"id": "l20-tutankhamun-young", "kind": "loop", "series": "Dig Discoveries", "format": "one-fact",
-     "topic": "Tutankhamun became pharaoh at about nine years old", "wiki": ["Tutankhamun"]},
-
-    {"id": "m01-megalodon", "kind": "movie", "date": "2026-11-29", "series": "Prehistoric Giants", "format": "rise and fall",
-     "topic": "Megalodon: the rise and fall of the biggest shark that ever lived",
-     "angle": "from tooth fossils to the latest size estimates and the competition that may have doomed it",
-     "wiki": ["Megalodon", "Great white shark"]},
-    {"id": "m02-library-alexandria", "kind": "movie", "date": "2026-12-02", "series": "Myth Busters", "format": "investigation",
-     "topic": "The Library of Alexandria: what really destroyed it",
-     "angle": "not one fire but a slow decline - the evidence for each suspect", "wiki": ["Library of Alexandria", "Ptolemaic Kingdom"]},
-    {"id": "m03-pearl-harbor", "kind": "movie", "date": "2026-12-06", "timely": true, "series": "World War Stories", "format": "documentary story",
-     "topic": "Pearl Harbor, 85 years later: the morning that changed the world",
-     "angle": "the warnings, the 90 minutes, and how it pulled America into the war; respectful to the victims",
-     "wiki": ["Attack on Pearl Harbor", "Opana Radar Site", "USS Arizona (BB-39)"]},
-    {"id": "m04-indus-valley", "kind": "movie", "date": "2026-12-09", "series": "India's Genius", "format": "investigation",
-     "topic": "The Indus Valley Civilization: the lost cities with plumbing before Rome",
-     "angle": "grid streets, drains, a script nobody can read, and why the cities emptied", "wiki": ["Indus Valley Civilisation", "Mohenjo-daro", "Indus script"]},
-    {"id": "m05-gobekli-tepe", "kind": "movie", "date": "2026-12-13", "series": "Dig Discoveries", "format": "investigation",
-     "topic": "Gobekli Tepe: the temple that rewrote human history",
-     "angle": "hunter-gatherers carved giant pillars 11,000 years ago - what were they for?", "wiki": ["Göbekli Tepe", "Pre-Pottery Neolithic A"]},
-    {"id": "m06-fall-of-rome", "kind": "movie", "date": "2026-12-16", "series": "Timeline Twists", "format": "rise and fall",
-     "topic": "The fall of the Western Roman Empire: what really broke it",
-     "angle": "money, plague, civil wars and migration - and why the East survived 1,000 more years", "wiki": ["Fall of the Western Roman Empire", "Crisis of the Third Century"]},
-    {"id": "m07-woolly-mammoths", "kind": "movie", "date": "2026-12-20", "series": "Prehistoric Giants", "format": "rise and fall",
-     "topic": "Woolly mammoths: the last giants of the Ice Age",
-     "angle": "how they lived, how humans hunted them, the last island herd - and the plan to bring them back", "wiki": ["Woolly mammoth", "Wrangel Island", "De-extinction"]},
-    {"id": "m08-christmas-truce", "kind": "movie", "date": "2026-12-23", "series": "World War Stories", "format": "documentary story",
-     "topic": "The Christmas Truce of 1914: the night the war stopped",
-     "angle": "how it started, what really happened in no man's land, and why it never happened again", "wiki": ["Christmas truce", "Western Front (World War I)"]},
-    {"id": "m09-tutankhamun", "kind": "movie", "date": "2026-12-27", "series": "Dig Discoveries", "format": "investigation",
-     "topic": "Tutankhamun's tomb: the discovery and the curse myth explained",
-     "angle": "Howard Carter's search, what was inside, and the real reasons behind the 'curse' stories", "wiki": ["Tutankhamun", "KV62", "Curse of the pharaohs"]}
-  ]
+  {
+   "name": "Timeline Twists",
+   "about": "famous moments with a twist most people never heard",
+   "style": "Cinematic historical film still, photorealistic, golden-hour light, 35mm film grain, period-accurate costumes and streets",
+   "playlist": "Timeline Twists | History with Me",
+   "hashtags": [
+    "#historyfacts"
+   ],
+   "tags": [
+    "history facts",
+    "history stories"
+   ]
+  },
+  {
+   "name": "World War Stories",
+   "about": "human stories from the World Wars, told with respect, never glorifying violence",
+   "style": "1940s documentary film still, muted Kodachrome colors, heavy film grain, period-accurate uniforms, ships, aircraft and equipment",
+   "playlist": "World War Stories | History with Me",
+   "hashtags": [
+    "#ww2",
+    "#worldwar"
+   ],
+   "tags": [
+    "world war 2",
+    "ww2 history",
+    "world war history"
+   ]
+  },
+  {
+   "name": "Dig Discoveries",
+   "about": "archaeology finds that rewrote what we thought we knew",
+   "style": "Archaeological discovery photography meets cinematic reconstruction, natural light, dust in the air, documentary realism",
+   "playlist": "Dig Discoveries | History with Me",
+   "hashtags": [
+    "#archaeology"
+   ],
+   "tags": [
+    "archaeology",
+    "ancient history",
+    "ancient discoveries"
+   ]
+  },
+  {
+   "name": "India's Genius",
+   "about": "the inventions, cities, scholars and rulers of ancient and medieval India",
+   "style": "Indian historical epic film still, warm golden light, richly detailed costumes, textiles and architecture of the exact era",
+   "playlist": "India's Genius | History with Me",
+   "hashtags": [
+    "#indianhistory"
+   ],
+   "tags": [
+    "indian history",
+    "ancient india",
+    "india history facts"
+   ]
+  },
+  {
+   "name": "Myth Busters",
+   "about": "popular history myths flipped with the real story and the evidence",
+   "style": "Moody chiaroscuro cinematic still, painterly light, historically accurate details, mysterious atmosphere",
+   "playlist": "History Myths Busted | History with Me",
+   "hashtags": [
+    "#historymyths"
+   ],
+   "tags": [
+    "history myths",
+    "myths debunked",
+    "history facts"
+   ]
+  }
+ ],
+ "ideas": [
+  {
+   "id": "p01-titanic-pov",
+   "kind": "story",
+   "date": "2026-11-27",
+   "series": "Timeline Twists",
+   "format": "pov",
+   "topic": "POV: You're a passenger on the Titanic, 14 April 1912, 11:40 PM",
+   "angle": "the calm minutes after the iceberg, when most passengers had no idea; real details from survivors' accounts",
+   "wiki": [
+    "Titanic",
+    "Sinking of the Titanic"
+   ]
+  },
+  {
+   "id": "p02-trex-hatchling-pov",
+   "kind": "story",
+   "date": "2026-11-28",
+   "series": "Prehistoric Giants",
+   "format": "pov",
+   "topic": "POV: You're a baby Tyrannosaurus, 67 million years ago",
+   "angle": "how fast a T. rex grew and why most never reached adulthood (real growth-ring science)",
+   "wiki": [
+    "Tyrannosaurus"
+   ]
+  },
+  {
+   "id": "p03-gladiator-pov",
+   "kind": "story",
+   "date": "2026-11-29",
+   "series": "Myth Busters",
+   "format": "pov",
+   "topic": "POV: You're a gladiator walking into the Colosseum",
+   "angle": "most fights were not to the death - gladiators were expensive (myth vs reality)",
+   "wiki": [
+    "Gladiator",
+    "Colosseum"
+   ]
+  },
+  {
+   "id": "p04-black-death-pov",
+   "kind": "story",
+   "date": "2026-11-30",
+   "series": "Timeline Twists",
+   "format": "pov",
+   "topic": "POV: The Black Death reaches your town, 1348",
+   "angle": "what people believed caused it and what they did, told without graphic detail",
+   "wiki": [
+    "Black Death"
+   ]
+  },
+  {
+   "id": "p05-apollo11-pov",
+   "kind": "story",
+   "date": "2026-12-01",
+   "series": "Timeline Twists",
+   "format": "pov",
+   "topic": "POV: You're watching Apollo 11 launch, 16 July 1969",
+   "angle": "the roar and shockwave felt miles away, and the crowds of about a million people who came to watch",
+   "wiki": [
+    "Apollo 11"
+   ]
+  },
+  {
+   "id": "s01-quetzalcoatlus",
+   "kind": "story",
+   "date": "2026-11-27",
+   "series": "Prehistoric Giants",
+   "format": "one-number",
+   "topic": "Quetzalcoatlus, the flying reptile as tall as a giraffe",
+   "angle": "how something that big may have got off the ground: the vaulting launch idea, labelled as a hypothesis",
+   "wiki": [
+    "Quetzalcoatlus"
+   ]
+  },
+  {
+   "id": "s02-napoleon-height",
+   "kind": "story",
+   "date": "2026-11-28",
+   "series": "Myth Busters",
+   "format": "myth-vs-fact",
+   "topic": "Napoleon was not short",
+   "angle": "French inches, British cartoons and a nickname created the myth",
+   "wiki": [
+    "Napoleon complex",
+    "Napoleon"
+   ]
+  },
+  {
+   "id": "s03-rani-ki-vav",
+   "kind": "story",
+   "date": "2026-11-29",
+   "series": "India's Genius",
+   "format": "hidden-detail",
+   "topic": "Rani ki Vav, the upside-down temple built for water",
+   "angle": "a queen's stepwell buried by floods for centuries",
+   "wiki": [
+    "Rani ki vav"
+   ]
+  },
+  {
+   "id": "s04-terracotta-army",
+   "kind": "story",
+   "date": "2026-11-30",
+   "series": "Dig Discoveries",
+   "format": "timeline-twist",
+   "topic": "The Terracotta Army was found by farmers digging a well",
+   "angle": "1974, a drought, a well - and thousands of soldiers underneath",
+   "wiki": [
+    "Terracotta Army"
+   ]
+  },
+  {
+   "id": "s05-emu-war",
+   "kind": "story",
+   "date": "2026-12-01",
+   "series": "Timeline Twists",
+   "format": "timeline-twist",
+   "topic": "The Great Emu War of 1932",
+   "angle": "soldiers with machine guns against flightless birds - and the birds won",
+   "wiki": [
+    "Emu War"
+   ]
+  },
+  {
+   "id": "s06-napoleon-crown",
+   "kind": "story",
+   "date": "2026-12-02",
+   "timely": true,
+   "series": "Timeline Twists",
+   "format": "myth-vs-fact",
+   "topic": "Napoleon crowned himself emperor (2 December 1804)",
+   "angle": "the famous moment was planned in advance, not a snatch from the Pope",
+   "wiki": [
+    "Coronation of Napoleon"
+   ]
+  },
+  {
+   "id": "s07-megalodon-teeth",
+   "kind": "story",
+   "date": "2026-12-03",
+   "series": "Prehistoric Giants",
+   "format": "one-number",
+   "topic": "Megalodon, the biggest shark that ever lived",
+   "angle": "what its hand-sized teeth reveal, and why it vanished",
+   "wiki": [
+    "Megalodon"
+   ]
+  },
+  {
+   "id": "s08-ghost-army",
+   "kind": "story",
+   "date": "2026-12-04",
+   "series": "World War Stories",
+   "format": "unsung-hero",
+   "topic": "The Ghost Army of World War II",
+   "angle": "artists with inflatable tanks and fake radio traffic who fooled an army",
+   "wiki": [
+    "Ghost Army"
+   ]
+  },
+  {
+   "id": "s09-antikythera",
+   "kind": "story",
+   "date": "2026-12-05",
+   "series": "Dig Discoveries",
+   "format": "mystery",
+   "topic": "The Antikythera mechanism, a 2,000-year-old computer",
+   "angle": "sponge divers found gears that nobody could match for a thousand years",
+   "wiki": [
+    "Antikythera mechanism"
+   ]
+  },
+  {
+   "id": "s10-halifax-explosion",
+   "kind": "story",
+   "date": "2026-12-06",
+   "timely": true,
+   "series": "Timeline Twists",
+   "format": "you-are-there",
+   "topic": "The Halifax Explosion (6 December 1917)",
+   "angle": "one collision in a harbour made the largest man-made blast before the atomic bomb; told with respect",
+   "wiki": [
+    "Halifax Explosion"
+   ]
+  },
+  {
+   "id": "s11-pearl-harbor-radar",
+   "kind": "story",
+   "date": "2026-12-07",
+   "timely": true,
+   "series": "World War Stories",
+   "format": "hidden-detail",
+   "topic": "Pearl Harbor, 85 years on: the radar warning nobody acted on",
+   "angle": "two young radar operators saw the planes coming almost an hour early",
+   "wiki": [
+    "Attack on Pearl Harbor",
+    "Opana Radar Site"
+   ]
+  },
+  {
+   "id": "s12-zero",
+   "kind": "story",
+   "date": "2026-12-08",
+   "series": "India's Genius",
+   "format": "one-number",
+   "topic": "How India gave the world zero",
+   "angle": "Brahmagupta wrote the rules for nothing - and changed all of mathematics",
+   "wiki": [
+    "Brahmagupta",
+    "0"
+   ]
+  },
+  {
+   "id": "s13-viking-helmets",
+   "kind": "story",
+   "date": "2026-12-09",
+   "series": "Myth Busters",
+   "format": "myth-vs-fact",
+   "topic": "Vikings never wore horned helmets",
+   "angle": "the horns came from a 19th-century opera costume",
+   "wiki": [
+    "Horned helmet",
+    "Viking Age arms and armour"
+   ]
+  },
+  {
+   "id": "s14-nobel-obituary",
+   "kind": "story",
+   "date": "2026-12-10",
+   "timely": true,
+   "series": "Timeline Twists",
+   "format": "timeline-twist",
+   "topic": "Alfred Nobel and the obituary that called him a merchant of death",
+   "angle": "the story behind the first Nobel Prizes on 10 December 1901 (hedge the obituary legend)",
+   "wiki": [
+    "Alfred Nobel",
+    "Nobel Prize"
+   ]
+  },
+  {
+   "id": "s15-titanoboa",
+   "kind": "story",
+   "date": "2026-12-11",
+   "series": "Prehistoric Giants",
+   "format": "one-number",
+   "topic": "Titanoboa, a snake as long as a bus",
+   "angle": "found in a coal mine, it tells us how hot the world was after the dinosaurs",
+   "wiki": [
+    "Titanoboa"
+   ]
+  },
+  {
+   "id": "s16-delhi-durbar",
+   "kind": "story",
+   "date": "2026-12-12",
+   "timely": true,
+   "series": "India's Genius",
+   "format": "timeline-twist",
+   "topic": "Delhi Durbar 1911: the day India's capital moved to Delhi",
+   "angle": "a surprise announcement on 12 December 1911 that created New Delhi",
+   "wiki": [
+    "Delhi Durbar",
+    "New Delhi"
+   ]
+  },
+  {
+   "id": "s17-gobekli-tepe",
+   "kind": "story",
+   "date": "2026-12-13",
+   "series": "Dig Discoveries",
+   "format": "mystery",
+   "topic": "Gobekli Tepe, a temple older than farming",
+   "angle": "built about 11,000 years ago, before writing, the wheel or farming villages",
+   "wiki": [
+    "Göbekli Tepe"
+   ]
+  },
+  {
+   "id": "s18-amundsen",
+   "kind": "story",
+   "date": "2026-12-14",
+   "timely": true,
+   "series": "Timeline Twists",
+   "format": "what-if",
+   "topic": "The race to the South Pole (14 December 1911)",
+   "angle": "why Amundsen's dogs beat Scott's ponies and motor sledges",
+   "wiki": [
+    "Amundsen's South Pole expedition"
+   ]
+  },
+  {
+   "id": "s19-wojtek",
+   "kind": "story",
+   "date": "2026-12-15",
+   "series": "World War Stories",
+   "format": "unsung-hero",
+   "topic": "Wojtek, the bear who served in the Polish army",
+   "angle": "he carried ammunition at Monte Cassino and was enlisted as a private",
+   "wiki": [
+    "Wojtek (bear)"
+   ]
+  },
+  {
+   "id": "s20-flat-earth",
+   "kind": "story",
+   "date": "2026-12-16",
+   "series": "Myth Busters",
+   "format": "myth-vs-fact",
+   "topic": "Medieval people did not think the Earth was flat",
+   "angle": "the flat-Earth myth was invented in the 1800s",
+   "wiki": [
+    "Myth of the flat Earth"
+   ]
+  },
+  {
+   "id": "s21-wright-flight",
+   "kind": "story",
+   "date": "2026-12-17",
+   "timely": true,
+   "series": "Timeline Twists",
+   "format": "one-number",
+   "topic": "The first powered flight lasted 12 seconds (17 December 1903)",
+   "angle": "12 seconds, 120 feet - and the world changed",
+   "wiki": [
+    "Wright Flyer"
+   ]
+  },
+  {
+   "id": "s22-nalanda",
+   "kind": "story",
+   "date": "2026-12-18",
+   "series": "India's Genius",
+   "format": "what-if",
+   "topic": "Nalanda, the ancient university that drew scholars from across Asia",
+   "angle": "what was lost when it fell (hedge the 'burned for months' legend)",
+   "wiki": [
+    "Nalanda mahavihara"
+   ]
+  },
+  {
+   "id": "s23-mammoths-pyramids",
+   "kind": "story",
+   "date": "2026-12-19",
+   "series": "Prehistoric Giants",
+   "format": "timeline-twist",
+   "topic": "Woolly mammoths were still alive when the Great Pyramid was built",
+   "angle": "the last mammoths on Wrangel Island",
+   "wiki": [
+    "Woolly mammoth",
+    "Wrangel Island"
+   ]
+  },
+  {
+   "id": "s24-pompeii-bread",
+   "kind": "story",
+   "date": "2026-12-20",
+   "series": "Dig Discoveries",
+   "format": "pov",
+   "topic": "POV: You're a baker in Pompeii on the morning Vesuvius erupts",
+   "angle": "the loaves still in the oven tell us about the town's final morning; non-graphic",
+   "wiki": [
+    "Pompeii"
+   ]
+  },
+  {
+   "id": "s25-newgrange",
+   "kind": "story",
+   "date": "2026-12-21",
+   "timely": true,
+   "series": "Dig Discoveries",
+   "format": "hidden-detail",
+   "topic": "Newgrange: a 5,000-year-old tomb that catches the winter solstice sunrise",
+   "angle": "on the mornings around the winter solstice, sunlight creeps down the passage and lights the chamber for about 17 minutes",
+   "wiki": [
+    "Newgrange"
+   ]
+  },
+  {
+   "id": "s26-cleopatra-greek",
+   "kind": "story",
+   "date": "2026-12-22",
+   "series": "Myth Busters",
+   "format": "myth-vs-fact",
+   "topic": "Cleopatra's family was Greek, not Egyptian",
+   "angle": "her Greek-speaking dynasty ruled Egypt for almost 300 years - and she was said to be the first of them to learn Egyptian",
+   "wiki": [
+    "Cleopatra",
+    "Ptolemaic dynasty"
+   ]
+  },
+  {
+   "id": "s27-operation-mincemeat",
+   "kind": "story",
+   "date": "2026-12-23",
+   "series": "World War Stories",
+   "format": "unsung-hero",
+   "topic": "Operation Mincemeat: the fake officer who fooled Hitler",
+   "angle": "a briefcase of forged letters redirected an army; told without graphic detail",
+   "wiki": [
+    "Operation Mincemeat"
+   ]
+  },
+  {
+   "id": "s28-christmas-truce",
+   "kind": "story",
+   "date": "2026-12-24",
+   "timely": true,
+   "series": "World War Stories",
+   "format": "you-are-there",
+   "topic": "The Christmas Truce of 1914",
+   "angle": "enemy soldiers sang carols and met in no man's land",
+   "wiki": [
+    "Christmas truce"
+   ]
+  },
+  {
+   "id": "s29-charlemagne",
+   "kind": "story",
+   "date": "2026-12-25",
+   "timely": true,
+   "series": "Timeline Twists",
+   "format": "timeline-twist",
+   "topic": "Charlemagne was crowned emperor on Christmas Day in 800",
+   "angle": "the coronation that revived the idea of a Roman emperor in the West",
+   "wiki": [
+    "Charlemagne",
+    "Coronation of Charlemagne"
+   ]
+  },
+  {
+   "id": "s30-iron-pillar",
+   "kind": "story",
+   "date": "2026-12-26",
+   "series": "India's Genius",
+   "format": "mystery",
+   "topic": "The Iron Pillar of Delhi, 1,600 years without rusting away",
+   "angle": "what scientists found in its iron that protects it",
+   "wiki": [
+    "Iron pillar of Delhi"
+   ]
+  },
+  {
+   "id": "l01-cleopatra-moon",
+   "kind": "loop",
+   "series": "Timeline Twists",
+   "format": "time-gap",
+   "topic": "Cleopatra lived closer in time to the Moon landing than to the building of the Great Pyramid",
+   "wiki": [
+    "Cleopatra",
+    "Great Pyramid of Giza"
+   ]
+  },
+  {
+   "id": "l02-sharks-trees",
+   "kind": "loop",
+   "series": "Prehistoric Giants",
+   "format": "time-gap",
+   "topic": "Sharks are older than trees",
+   "wiki": [
+    "Shark",
+    "Tree"
+   ]
+  },
+  {
+   "id": "l03-oxford-aztec",
+   "kind": "loop",
+   "series": "Timeline Twists",
+   "format": "time-gap",
+   "topic": "Oxford University is older than the Aztec capital Tenochtitlan",
+   "wiki": [
+    "University of Oxford",
+    "Tenochtitlan"
+   ]
+  },
+  {
+   "id": "l04-trex-stegosaurus",
+   "kind": "loop",
+   "series": "Prehistoric Giants",
+   "format": "time-gap",
+   "topic": "Tyrannosaurus lived closer in time to you than to Stegosaurus",
+   "wiki": [
+    "Tyrannosaurus",
+    "Stegosaurus"
+   ]
+  },
+  {
+   "id": "l05-shortest-war",
+   "kind": "loop",
+   "series": "Timeline Twists",
+   "format": "scale",
+   "topic": "The shortest war in history lasted under an hour (Anglo-Zanzibar War, 1896)",
+   "wiki": [
+    "Anglo-Zanzibar War"
+   ]
+  },
+  {
+   "id": "l06-great-wall-space",
+   "kind": "loop",
+   "series": "Myth Busters",
+   "format": "one-fact",
+   "topic": "You cannot see the Great Wall of China from space with the naked eye",
+   "wiki": [
+    "Great Wall of China"
+   ]
+  },
+  {
+   "id": "l07-everest-seafloor",
+   "kind": "loop",
+   "series": "Prehistoric Giants",
+   "format": "one-fact",
+   "topic": "The top of Mount Everest is made of rock that formed on an ancient sea floor",
+   "wiki": [
+    "Mount Everest",
+    "Qomolangma Formation"
+   ]
+  },
+  {
+   "id": "l08-eiffel-summer",
+   "kind": "loop",
+   "series": "Timeline Twists",
+   "format": "scale",
+   "topic": "The Eiffel Tower grows taller in summer heat",
+   "wiki": [
+    "Eiffel Tower"
+   ]
+  },
+  {
+   "id": "l09-rome-printing",
+   "kind": "loop",
+   "series": "Timeline Twists",
+   "format": "time-gap",
+   "topic": "The Roman Empire (in its eastern half) still existed when the printing press was invented",
+   "wiki": [
+    "Fall of Constantinople",
+    "Printing press"
+   ]
+  },
+  {
+   "id": "l10-indus-drains",
+   "kind": "loop",
+   "series": "India's Genius",
+   "format": "one-fact",
+   "topic": "Indus Valley cities had covered drains and private bathrooms 4,500 years ago",
+   "wiki": [
+    "Indus Valley Civilisation",
+    "Mohenjo-daro"
+   ]
+  },
+  {
+   "id": "l11-chess-india",
+   "kind": "loop",
+   "series": "India's Genius",
+   "format": "one-fact",
+   "topic": "Chess began in India as chaturanga",
+   "wiki": [
+    "Chaturanga"
+   ]
+  },
+  {
+   "id": "l12-pyramid-workers",
+   "kind": "loop",
+   "series": "Myth Busters",
+   "format": "one-fact",
+   "topic": "The Giza pyramids were built by paid workers, not slaves",
+   "wiki": [
+    "Giza pyramid complex",
+    "Egyptian pyramid construction techniques"
+   ]
+  },
+  {
+   "id": "l13-vikings-america",
+   "kind": "loop",
+   "series": "Timeline Twists",
+   "format": "time-gap",
+   "topic": "Vikings reached America about 500 years before Columbus",
+   "wiki": [
+    "L'Anse aux Meadows"
+   ]
+  },
+  {
+   "id": "l14-first-speeding",
+   "kind": "loop",
+   "series": "Timeline Twists",
+   "format": "scale",
+   "topic": "The first speeding fine was for driving at about 8 miles per hour (1896)",
+   "wiki": [
+    "Walter Arnold (motorist)"
+   ]
+  },
+  {
+   "id": "l15-dino-day",
+   "kind": "loop",
+   "series": "Prehistoric Giants",
+   "format": "scale",
+   "topic": "When dinosaurs lived, a day on Earth was shorter than 24 hours",
+   "wiki": [
+    "Day length fluctuations",
+    "Tidal acceleration"
+   ]
+  },
+  {
+   "id": "l16-stegosaurus-brain",
+   "kind": "loop",
+   "series": "Prehistoric Giants",
+   "format": "scale",
+   "topic": "Stegosaurus had a tiny brain for its huge body",
+   "wiki": [
+    "Stegosaurus"
+   ]
+  },
+  {
+   "id": "l17-mammoth-ivory",
+   "kind": "loop",
+   "series": "Prehistoric Giants",
+   "format": "scale",
+   "topic": "Mammoth tusks could grow more than four metres long",
+   "wiki": [
+    "Woolly mammoth"
+   ]
+  },
+  {
+   "id": "l18-colosseum-water",
+   "kind": "loop",
+   "series": "Timeline Twists",
+   "format": "one-fact",
+   "topic": "Romans may have flooded the Colosseum for mock sea battles",
+   "wiki": [
+    "Colosseum",
+    "Naumachia"
+   ]
+  },
+  {
+   "id": "l19-ashoka-pillars",
+   "kind": "loop",
+   "series": "India's Genius",
+   "format": "one-fact",
+   "topic": "India's national emblem comes from a pillar carved 2,200 years ago",
+   "wiki": [
+    "Lion Capital of Ashoka"
+   ]
+  },
+  {
+   "id": "l20-tutankhamun-young",
+   "kind": "loop",
+   "series": "Dig Discoveries",
+   "format": "one-fact",
+   "topic": "Tutankhamun became pharaoh at about nine years old",
+   "wiki": [
+    "Tutankhamun"
+   ]
+  },
+  {
+   "id": "m01-megalodon",
+   "kind": "movie",
+   "date": "2026-11-29",
+   "series": "Prehistoric Giants",
+   "format": "rise and fall",
+   "topic": "Megalodon: the rise and fall of the biggest shark that ever lived",
+   "angle": "from tooth fossils to the latest size estimates and the competition that may have doomed it",
+   "wiki": [
+    "Megalodon",
+    "Great white shark"
+   ]
+  },
+  {
+   "id": "m02-library-alexandria",
+   "kind": "movie",
+   "date": "2026-12-02",
+   "series": "Myth Busters",
+   "format": "investigation",
+   "topic": "The Library of Alexandria: what really destroyed it",
+   "angle": "not one fire but a slow decline - the evidence for each suspect",
+   "wiki": [
+    "Library of Alexandria",
+    "Ptolemaic Kingdom"
+   ]
+  },
+  {
+   "id": "m03-pearl-harbor",
+   "kind": "movie",
+   "date": "2026-12-06",
+   "timely": true,
+   "series": "World War Stories",
+   "format": "documentary story",
+   "topic": "Pearl Harbor, 85 years later: the morning that changed the world",
+   "angle": "the warnings, the 90 minutes, and how it pulled America into the war; respectful to the victims",
+   "wiki": [
+    "Attack on Pearl Harbor",
+    "Opana Radar Site",
+    "USS Arizona (BB-39)"
+   ]
+  },
+  {
+   "id": "m04-indus-valley",
+   "kind": "movie",
+   "date": "2026-12-09",
+   "series": "India's Genius",
+   "format": "investigation",
+   "topic": "The Indus Valley Civilization: the lost cities with plumbing before Rome",
+   "angle": "grid streets, drains, a script nobody can read, and why the cities emptied",
+   "wiki": [
+    "Indus Valley Civilisation",
+    "Mohenjo-daro",
+    "Indus script"
+   ]
+  },
+  {
+   "id": "m05-gobekli-tepe",
+   "kind": "movie",
+   "date": "2026-12-13",
+   "series": "Dig Discoveries",
+   "format": "investigation",
+   "topic": "Gobekli Tepe: the temple that rewrote human history",
+   "angle": "hunter-gatherers carved giant pillars 11,000 years ago - what were they for?",
+   "wiki": [
+    "Göbekli Tepe",
+    "Pre-Pottery Neolithic A"
+   ]
+  },
+  {
+   "id": "m06-fall-of-rome",
+   "kind": "movie",
+   "date": "2026-12-16",
+   "series": "Timeline Twists",
+   "format": "rise and fall",
+   "topic": "The fall of the Western Roman Empire: what really broke it",
+   "angle": "money, plague, civil wars and migration - and why the East survived 1,000 more years",
+   "wiki": [
+    "Fall of the Western Roman Empire",
+    "Crisis of the Third Century"
+   ]
+  },
+  {
+   "id": "m07-woolly-mammoths",
+   "kind": "movie",
+   "date": "2026-12-20",
+   "series": "Prehistoric Giants",
+   "format": "rise and fall",
+   "topic": "Woolly mammoths: the last giants of the Ice Age",
+   "angle": "how they lived, how humans hunted them, the last island herd - and the plan to bring them back",
+   "wiki": [
+    "Woolly mammoth",
+    "Wrangel Island",
+    "De-extinction"
+   ]
+  },
+  {
+   "id": "m08-christmas-truce",
+   "kind": "movie",
+   "date": "2026-12-23",
+   "series": "World War Stories",
+   "format": "documentary story",
+   "topic": "The Christmas Truce of 1914: the night the war stopped",
+   "angle": "how it started, what really happened in no man's land, and why it never happened again",
+   "wiki": [
+    "Christmas truce",
+    "Western Front (World War I)"
+   ]
+  },
+  {
+   "id": "m09-tutankhamun",
+   "kind": "movie",
+   "date": "2026-12-27",
+   "series": "Dig Discoveries",
+   "format": "investigation",
+   "topic": "Tutankhamun's tomb: the discovery and the curse myth explained",
+   "angle": "Howard Carter's search, what was inside, and the real reasons behind the 'curse' stories",
+   "wiki": [
+    "Tutankhamun",
+    "KV62",
+    "Curse of the pharaohs"
+   ]
+  }
+ ]
 }

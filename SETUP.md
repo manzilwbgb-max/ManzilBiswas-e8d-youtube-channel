@@ -30,7 +30,8 @@ The schedules are already switched on: until the secrets are in, each run just n
 
 1. Open https://aistudio.google.com/apikey → **Create API key** → save it as `GEMINI_API_KEY`.
    The free tier is enough for the agent's brain and, while its quota lasts, the voice.
-2. Optional, for Gemini AI pictures and Veo motion: in AI Studio, **set up billing** on the key's project.
+2. For cinematic AI video (and Gemini pictures): in AI Studio, **set up billing** on the key's project — video has no
+   free tier. See PLAYBOOK.md for what it costs and how to cap it.
    Your Gemini (Google AI Pro) app subscription doesn't pay for API calls by itself, but Google AI Pro can come with
    monthly Google Cloud credits you can claim in AI Studio and spend on the Gemini API (availability varies by country).
    Set a budget alert in Google Cloud Billing.
@@ -86,7 +87,11 @@ From then on everything runs on its own (times in IST):
 | `PICTURES` | `auto` (Gemini AI if billing works, else free AI; real archive photos for real events), `free`, `archive`, `gemini` | `auto` |
 | `MOVIE_PICTURES` | same, for movies only (set `free` to keep costs low) | `PICTURES` |
 | `SHORTS_AI_PICTURES_MAX` / `MOVIE_AI_PICTURES_MAX` | most paid AI pictures per video (0 = no limit); the rest are free | `0` / `30` |
-| `MOTION` / `MOVIE_MOTION` | opening scenes animated with Veo AI video (needs billing, billed per second) | `0` |
+| `CINEMATIC` | `auto` = Shorts are real AI video shots when billing allows; `off` = pictures with camera moves | `auto` |
+| `CINE_FORMATS` | Short formats to rotate: `pov`, `trailer`, `timetraveler` | `pov,trailer` |
+| `SHORT_VIDEO_BUDGET` / `LOOP_VIDEO_BUDGET` / `MOVIE_VIDEO_BUDGET` | most dollars of AI video per video (0 = none) | `3` / `1` / `3` |
+| `VIDEO_RESOLUTION` | `720p` (≈ $0.10/s, upscaled to 1080p for free) or `1080p` (≈ $0.15/s) | `720p` |
+| `MOVIE_MOTION` | how many key movie scenes become AI video | `4` |
 | `VOICE` | `auto`, `gemini`, `free` | `auto` |
 | `TEXT_MODEL`, `TTS_MODEL`, `IMAGE_MODEL` | pin a Gemini model; empty = newest Flash model the key can use | empty |
 

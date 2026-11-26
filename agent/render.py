@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
-from . import gemini, sources
+from . import gemini, sources, video
 from .voice import speak_all
 from .util import log
 
@@ -233,7 +233,7 @@ def phrases(text):
     return out
 
 
-def write_ass(path, w, h, hook, cues):
+def write_ass(path, w, h, hook, cues, hook_secs=2.6):
     big = int(h * 0.04)
     head = (
         "[Script Info]\nScriptType: v4.00+\n"
@@ -248,7 +248,7 @@ def write_ass(path, w, h, hook, cues):
     )
     lines = []
     if hook:
-        lines.append(f"Dialogue: 1,{ass_time(0)},{ass_time(2.6)},Hook,,0,0,0,,{{\\fad(120,250)}}{ass_escape(hook.upper())}")
+        lines.append(f"Dialogue: 1,{ass_time(0)},{ass_time(hook_secs)},Hook,,0,0,0,,{{\\fad(120,250)}}{ass_escape(hook.upper())}")
     for t0, t1, txt in cues:
         lines.append(f"Dialogue: 0,{ass_time(t0)},{ass_time(t1)},Cap,,0,0,0,,{{\\fad(60,60)}}{ass_escape(txt.upper())}")
     with open(path, "w", encoding="utf-8") as f:
@@ -417,54 +417,6 @@ class Pictures:
                 self.reserved = max(self.reserved - 1, 0)
 
 
-def veo_clip(prompt, aspect, seconds, out_path, w, h):
-    """Real AI motion for one scene with Veo (needs Gemini API billing). Returns True when the clip is ready."""
-    import time as _t
-    import requests as _rq
-    names = {}
-    r = _rq.get(f"{gemini.API}/models", params={"pageSize": 1000}, headers={"x-goog-api-key": gemini.key()}, timeout=30)
-    for m in r.json().get("models", []):
-        names[m["name"].split("/", 1)[-1]] = m.get("supportedGenerationMethods", [])
-    veo = sorted((n for n, meth in names.items() if "veo" in n and "predictLongRunning" in meth),
-                 key=lambda n: (("fast" in n) * 10 + gemini._version(n)), reverse=True)
-    model = os.environ.get("VEO_MODEL") or (veo[0] if veo else None)
-    if not model:
-        log("no Veo model for this key")
-        return False
-    body = {"instances": [{"prompt": prompt}], "parameters": {"aspectRatio": aspect}}
-    r = _rq.post(f"{gemini.API}/models/{model}:predictLongRunning", json=body, headers={"x-goog-api-key": gemini.key()}, timeout=60)
-    if r.status_code != 200 and aspect != "16:9":
-        body["parameters"]["aspectRatio"] = "16:9"
-        r = _rq.post(f"{gemini.API}/models/{model}:predictLongRunning", json=body, headers={"x-goog-api-key": gemini.key()}, timeout=60)
-    if r.status_code != 200:
-        log("Veo refused:", r.text[:200])
-        return False
-    op = r.json().get("name")
-    for _ in range(60):
-        _t.sleep(10)
-        j = _rq.get(f"{gemini.API}/{op}", headers={"x-goog-api-key": gemini.key()}, timeout=30).json()
-        if j.get("done"):
-            if j.get("error"):
-                log("Veo failed:", str(j["error"])[:200])
-                return False
-            resp = j.get("response", {})
-            samples = (resp.get("generateVideoResponse") or resp).get("generatedSamples") or resp.get("videos") or []
-            uri = samples and ((samples[0].get("video") or {}).get("uri") or samples[0].get("uri"))
-            if not uri:
-                log("Veo returned no video")
-                return False
-            v = _rq.get(uri, headers={"x-goog-api-key": gemini.key()}, timeout=300, allow_redirects=True)
-            raw = out_path + ".raw.mp4"
-            with open(raw, "wb") as f:
-                f.write(v.content)
-            run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-stream_loop", "-1", "-i", raw, "-t", f"{seconds:.3f}",
-                 "-vf", f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h},fps={FPS},format=yuv420p",
-                 "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-r", str(FPS), "-g", str(FPS * 2), out_path])
-            return True
-    log("Veo took too long")
-    return False
-
-
 # ---------------------------------------------------------------- music
 
 MUSIC_DIR = os.environ.get("MUSIC_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "music"))
@@ -600,19 +552,26 @@ def make(spec, work):
     if chapters:
         chapters[0]["start"] = 0.0
 
-    # Veo motion for the first scenes when asked and billing allows
+    # AI video for the most important scenes (cold open first, then each chapter's first scene), within budget
     motion = int(spec.get("motion", 0) or 0)
-    clips = {}
-    for i in range(min(motion, n)):
-        seg = os.path.join(d, f"veo_{i:03d}.mp4")
+    clips, want = {}, []
+    if motion:
+        firsts = [c["scene"] for c in chapters]
+        want = list(dict.fromkeys(list(range(min(3, n))) + firsts))[:motion]
+    for i in want:
+        raw, seg = os.path.join(d, f"ai_{i:03d}.raw.mp4"), os.path.join(d, f"ai_{i:03d}.mp4")
         try:
-            if veo_clip(f"{spec['style']}. {scenes[i]['image_prompt']}. Slow cinematic camera move, no text, no speech.",
-                        F["aspect"], ends[i] - starts[i], seg, w, h):
-                clips[i] = seg
+            video.clip(f"{scenes[i]['image_prompt']}. Slow cinematic camera move, natural ambient sound, no dialogue.",
+                       F["aspect"], min(ends[i] - starts[i], 10), raw, first_frame=os.path.join(d, f"img_{i:03d}.jpg"))
+            fit_clip(raw, seg, ends[i] - starts[i], w, h, keep_audio=False)
+            clips[i] = seg
+        except gemini.Fatal as e:
+            warnings.append(f"AI video skipped: {str(e)[:120]}")
+            break
         except Exception as e:
-            log("Veo clip skipped:", str(e)[:200])
-    if motion and not clips:
-        warnings.append("AI motion clips were skipped (Veo needs Gemini API billing); used camera moves instead")
+            log("AI video shot skipped:", str(e)[:200])
+    if motion and not clips and not any(x.startswith("AI video skipped") for x in warnings):
+        warnings.append("AI video shots failed; used camera moves instead")
 
     patterns = KB_PATTERNS_TALL if h > w else KB_PATTERNS
     first_of = {c["scene"]: k for k, c in enumerate(chapters)}
@@ -674,7 +633,8 @@ def make(spec, work):
              "libx264", "-preset", "veryfast", "-crf", "30", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", preview])
     out = {"video": final, "preview": preview, "duration": round(probe_duration(final), 2), "warnings": warnings,
            "chapters": [{"title": c["title"], "start": c["start"]} for c in chapters], "sources": pics.used,
-           "motion_clips": len(clips), "voice_engine": engine[0] if engine else ""}
+           "motion_clips": len(clips), "voice_engine": engine[0] if engine else "",
+           "video_seconds": round(sum(min(ends[i] - starts[i], 10) for i in clips), 1)}
     if fmt == "movie":
         thumb = os.path.join(d, "thumbnail.jpg")
         compose_thumbnail(thumb_src or os.path.join(d, "img_000.jpg"), spec.get("thumbnail", {}).get("text", ""), thumb)
@@ -692,3 +652,190 @@ def fit_size(path, out_path, max_mb=48):
          "-b:v", f"{kbps}k", "-maxrate", f"{kbps}k", "-bufsize", f"{kbps * 2}k", "-pix_fmt", "yuv420p", "-c:a", "aac",
          "-b:a", "128k", "-movflags", "+faststart", out_path])
     return out_path
+
+
+# ---------------------------------------------------------------- cinematic AI-video Shorts
+
+def fit_clip(raw, out, target, w, h, keep_audio=True):
+    """Fit an AI video shot to exactly `target` seconds at w x h, 30 fps: trim it, or slow it slightly and hold the
+    last frame when it is short. Keeps its natural sound (ambience, effects) unless keep_audio is False."""
+    dur = max(probe_duration(raw), 0.5)
+    slow = min(max(target / dur, 1.0), 1.25)
+    pad = max(target - dur * slow, 0) + 0.1
+    vf = (f"scale={w}:{h}:force_original_aspect_ratio=increase:flags=lanczos,crop={w}:{h},setsar=1,"
+          f"setpts=PTS*{slow:.4f},fps={FPS},tpad=stop_mode=clone:stop_duration={pad:.3f},format=yuv420p")
+    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", raw]
+    if keep_audio and not video.has_audio(raw):
+        cmd += ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
+        amap = "1:a"
+        af = []
+    else:
+        amap = "0:a"
+        af = ["-af", "aresample=48000,aformat=channel_layouts=stereo,apad"]
+    cmd += ["-vf", vf, "-map", "0:v"]
+    if keep_audio:
+        cmd += ["-map", amap] + af + ["-c:a", "aac", "-b:a", "160k"]
+    else:
+        cmd += ["-an"]
+    cmd += ["-t", f"{target:.3f}", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-r", str(FPS),
+            "-g", str(FPS * 2), out]
+    run(cmd)
+    return out
+
+
+def make_cinematic(spec, work):
+    """spec: shots [{seconds, visual, voiceover, dialogue, archive_query}], hook, voice, style, aspect, topic, series,
+    pictures (fallback), voice_engine, host (reference image for a recurring on-camera character).
+    Each shot is real AI video with natural sound when available, otherwise a picture with a camera move."""
+    from concurrent.futures import ThreadPoolExecutor as Pool
+    d = work
+    os.makedirs(d, exist_ok=True)
+    aspect = spec.get("aspect", "9:16")
+    w, h = (1080, 1920) if aspect == "9:16" else (1920, 1080)
+    shots, warnings = spec["shots"], []
+    n = len(shots)
+
+    # 1) narration first: it decides how long each shot stays on screen
+    lines = [s.get("voiceover", "").strip() for s in shots]
+    said = [i for i, t in enumerate(lines) if t]
+    segs, engine, rate = {}, "", 24000
+    if said:
+        vo = os.path.join(d, "voice.wav")
+        engine = speak_all([" ".join(lines[i] for i in said)], spec.get("voice", "Charon"), [vo],
+                           spec.get("voice_engine", "auto"))
+        rate = wav_rate(vo)
+        total = probe_duration(vo)
+        bounds, _, _ = align([len(lines[i]) for i in said], total, silences(vo))
+        cuts = [0.0] + bounds + [total]
+        for k, i in enumerate(said):
+            seg = os.path.join(d, f"vo_{i:02d}.wav")
+            run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", vo, "-ss", f"{cuts[k]:.3f}",
+                 "-to", f"{cuts[k + 1]:.3f}", "-c:a", "pcm_s16le", seg])
+            segs[i] = (seg, cuts[k + 1] - cuts[k])
+    target = []
+    for i, s in enumerate(shots):
+        t = segs[i][1] + 0.2 if i in segs else float(s.get("seconds", 5))
+        if s.get("dialogue") and i not in segs:
+            t = max(t, len(s["dialogue"].split()) / 2.6 + 0.8)
+        target.append(round(min(max(t, 1.8), 10.0), 2))
+    if spec.get("kind") == "loop":
+        target[-1] = round(target[-1] - 0.15, 2)
+
+    # 2) the shots: AI video first, a picture with a camera move if video isn't possible
+    pics = Pictures(spec.get("pictures", "auto"), spec["style"], aspect, w, h, spec.get("topic", ""))
+    kind_of = [None] * n
+    refs = [spec["host"]] if spec.get("host") and os.path.exists(spec["host"]) else None
+    patterns = KB_PATTERNS_TALL if h > w else KB_PATTERNS
+
+    def make_shot(i):
+        s, out = shots[i], os.path.join(d, f"shot_{i:02d}.mp4")
+        sound = (f" The vlogger says: \"{s['dialogue']}\"" if s.get("dialogue") else
+                 " Natural ambient sound only, no dialogue, no music.")
+        try:
+            raw = os.path.join(d, f"raw_{i:02d}.mp4")
+            video.clip(f"{s['visual']}. Style: {spec['style']}.{sound}", aspect, max(target[i], 3), raw, refs=refs)
+            fit_clip(raw, out, target[i], w, h)
+            kind_of[i] = "video"
+            return
+        except gemini.Fatal as e:
+            msg = f"AI video unavailable ({str(e)[:140]}); used pictures with camera moves"
+            if msg not in warnings:
+                warnings.append(msg)
+        except Exception as e:
+            log(f"shot {i + 1}: AI video failed: {str(e)[:200]}")
+        img = os.path.join(d, f"img_{i:02d}.jpg")
+        src = pics.make(i, {"image_prompt": s["visual"], "archive_query": s.get("archive_query") or spec.get("topic", "")}, img)
+        if not src:
+            return
+        silent = os.path.join(d, f"still_{i:02d}.mp4")
+        render_segment(img, silent, max(int(round(target[i] * FPS)), 2), w, h, patterns[i % len(patterns)], "19")
+        run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", silent, "-f", "lavfi", "-i",
+             "anullsrc=r=48000:cl=stereo", "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k",
+             "-t", f"{target[i]:.3f}", out])
+        kind_of[i] = src
+
+    with Pool(max_workers=int(os.environ.get("VIDEO_WORKERS", "3"))) as ex:
+        list(ex.map(make_shot, range(n)))
+    ok = [i for i in range(n) if kind_of[i]]
+    if not ok:
+        raise RuntimeError("no shot could be made (no AI video and no pictures)")
+    for i in range(n):  # a missing shot borrows its neighbour
+        if not kind_of[i]:
+            j = min(ok, key=lambda k: abs(k - i))
+            fit_clip(os.path.join(d, f"shot_{j:02d}.mp4"), os.path.join(d, f"shot_{i:02d}.mp4"), target[i], w, h)
+            warnings.append(f"shot {i + 1} reused a neighbouring shot")
+
+    # 3) picture: join the shots (with their natural sound)
+    with open(os.path.join(d, "shots.txt"), "w") as f:
+        f.writelines(f"file 'shot_{i:02d}.mp4'\n" for i in range(n))
+    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", "shots.txt",
+         "-c", "copy", "joined.mp4"], cwd=d)
+    starts = [round(sum(target[:i]), 3) for i in range(n)]
+    total = round(sum(target), 3)
+
+    # 4) narration track laid on the timeline, shot by shot
+    parts = []
+    for i in range(n):
+        if i in segs:
+            parts.append(segs[i][0])
+            gap = target[i] - segs[i][1]
+        else:
+            gap = target[i]
+        if gap > 0.01:
+            pth = os.path.join(d, f"gap_{i:02d}.wav")
+            silence_wav(pth, gap, rate)
+            parts.append(pth)
+    with open(os.path.join(d, "narr.txt"), "w") as f:
+        f.writelines(f"file '{os.path.basename(x)}'\n" for x in parts)
+    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", "narr.txt",
+         "-ar", "48000", "-ac", "2", "narr.wav"], cwd=d)
+
+    # 5) mix: natural sound under the voice (ducked), optional music, broadcast loudness
+    track = pick_music(spec)
+    amb = float(os.environ.get("AMBIENCE_VOLUME", "0.55"))
+    inputs = ["-i", "joined.mp4", "-i", "narr.wav"] + (["-stream_loop", "-1", "-i", track] if track else [])
+    fc = (f"[1:a]asplit={3 if track else 2}[n1][n2]{'[n3]' if track else ''};"
+          f"[0:a]volume={amb}[amb];[amb][n1]sidechaincompress=threshold=0.03:ratio=8:attack=15:release=350[ambd];")
+    mix = "[ambd][n2]"
+    if track:
+        fc += (f"[2:a]aresample=48000,aformat=channel_layouts=stereo,volume={os.environ.get('MUSIC_VOLUME', '0.14')},"
+               f"afade=t=in:d=1,afade=t=out:st={max(total - 2.5, 0):.2f}:d=2.5[m];"
+               f"[m][n3]sidechaincompress=threshold=0.02:ratio=6:attack=20:release=500[md];")
+        mix += "[md]"
+    fc += (f"{mix}amix=inputs={3 if track else 2}:duration=first:normalize=0,"
+           f"loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]")
+    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y"] + inputs +
+        ["-filter_complex", fc, "-map", "[a]", "-t", f"{total:.3f}", "-c:a", "aac", "-b:a", "192k", "mix.m4a"], cwd=d)
+
+    # 6) captions for every spoken word, the hook on top, a light film finish
+    cues = []
+    for i, s in enumerate(shots):
+        words_ = s.get("voiceover") or s.get("dialogue") or ""
+        if not words_:
+            continue
+        t0 = starts[i] + 0.05
+        t1 = starts[i] + (segs[i][1] if i in segs else target[i] - 0.3)
+        ph = phrases(words_)
+        tot, acc = float(sum(len(x) for x in ph)) or 1.0, 0.0
+        for x in ph:
+            a = t0 + (t1 - t0) * acc / tot
+            acc += len(x)
+            cues.append((a, t0 + (t1 - t0) * acc / tot, x))
+    write_ass(os.path.join(d, "captions.ass"), w, h, spec.get("hook", ""), cues, hook_secs=3.2)
+    final = os.path.join(d, "video.mp4")
+    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", "joined.mp4", "-i", "mix.m4a",
+         "-vf", f"eq=contrast=1.04:saturation=1.06,noise=alls=2:allf=t,vignette=PI/6,"
+                f"subtitles=captions.ass:fontsdir={FONT_DIR}",
+         "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-preset", "veryfast", "-crf", "19", "-maxrate", "12M",
+         "-bufsize", "24M", "-pix_fmt", "yuv420p", "-c:a", "copy", "-shortest", "-movflags", "+faststart", "video.mp4"], cwd=d)
+    preview = os.path.join(d, "preview.mp4")
+    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", final, "-vf", "scale=540:-2", "-c:v", "libx264",
+         "-preset", "veryfast", "-crf", "27", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", preview])
+    used = {}
+    for k in kind_of:
+        if k:
+            used[k] = used.get(k, 0) + 1
+    vsec = round(sum(max(target[i], 3) for i in range(n) if kind_of[i] == "video"), 1)
+    return {"video": final, "preview": preview, "duration": round(probe_duration(final), 2), "warnings": warnings,
+            "chapters": [], "sources": used, "voice_engine": engine, "video_seconds": vsec,
+            "motion_clips": used.get("video", 0)}

@@ -15,10 +15,10 @@ on:
         options: [auto, free, archive, gemini]
         default: auto
       motion:
-        description: "Scenes animated with Veo AI video (needs Gemini billing; 0 = off)"
+        description: "Key scenes as real AI video (needs Gemini billing; 0 = off)"
         type: choice
-        options: ["0", "2", "4"]
-        default: "0"
+        options: ["4", "0", "2", "6"]
+        default: "4"
       dry_run:
         description: "Test only (send to Telegram, don't keep or upload)"
         type: boolean
@@ -61,9 +61,16 @@ jobs:
           POLLINATIONS_TOKEN: ${{ secrets.POLLINATIONS_TOKEN }}
           PICTURES: ${{ inputs.pictures || vars.MOVIE_PICTURES || vars.PICTURES || 'auto' }}
           AI_PICTURES_MAX: ${{ vars.MOVIE_AI_PICTURES_MAX || '30' }}
-          MOTION: ${{ inputs.motion || vars.MOVIE_MOTION || '0' }}
+          MOTION: ${{ inputs.motion || vars.MOVIE_MOTION || '4' }}
           VOICE: ${{ vars.VOICE || 'auto' }}
           MUSIC: ${{ vars.MUSIC || 'on' }}
+          CINEMATIC: ${{ vars.CINEMATIC || 'auto' }}
+          CINE_FORMATS: ${{ vars.CINE_FORMATS || 'pov,trailer' }}
+          VIDEO_RESOLUTION: ${{ vars.VIDEO_RESOLUTION || '720p' }}
+          VIDEO_MODEL: ${{ vars.VIDEO_MODEL || 'gemini-omni-1.1-flash,gemini-omni-flash' }}
+          SHORT_VIDEO_BUDGET: ${{ vars.SHORT_VIDEO_BUDGET || '3' }}
+          LOOP_VIDEO_BUDGET: ${{ vars.LOOP_VIDEO_BUDGET || '1' }}
+          MOVIE_VIDEO_BUDGET: ${{ vars.MOVIE_VIDEO_BUDGET || '3' }}
           DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
           TOPIC: ${{ inputs.topic }}
         run: python -m agent.main make --kind movie --topic "$TOPIC"

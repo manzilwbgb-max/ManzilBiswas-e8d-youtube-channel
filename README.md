@@ -6,11 +6,11 @@ makes the pictures and voice, edits the video, and sends it to you on **Telegram
 **Nothing reaches YouTube until you tap a button.**
 
 ```
-06:11 IST every day      ──►  1 story Short (20–35 s) + 1 loop Short (5–12 s)
+06:11 IST every day      ──►  1 cinematic POV/trailer Short (20–32 s) + 1 loop Short (6–10 s)
 05:53 IST Wed & Sun      ──►  1 history movie (≈15 min, 6 chapters, thumbnail)
                                   │
              trend scout → strategist picks topic → Wikipedia research → script
-             → fact-check → pictures + voice → camera moves, captions, music → video
+             → fact-check → director's shot list → AI video shots + voice → sound mix, captions, music
                                   │
                     Telegram preview with buttons ──► you decide
    ✅ Publish now · ⏰ Best time · 🔒 Private · 🔁 Remake · 🗑 Discard
@@ -43,7 +43,7 @@ the title, description and tags ready to copy, you upload it from the YouTube ap
 | Brain: topics, scripts, fact-check | Gemini free tier | same, higher limits |
 | Voice | Gemini voices while the free quota lasts, then a free offline voice (Piper) | Gemini voices |
 | Pictures | free AI pictures (Pollinations) + real public-domain archive photos (Wikimedia Commons) | Gemini AI pictures first, archive photos for real events |
-| Motion | cinematic camera moves on every picture | optional real AI video clips (Veo) for the opening scenes |
+| Video | pictures with cinematic camera moves, plus shot prompts you can turn into real AI video free in YouTube's own apps | every Short shot is real AI video with natural sound (Gemini Omni); movies get AI video for their key scenes |
 
 The agent switches automatically: if billing is off or a quota runs out mid-video, it falls back
 to the free source and keeps one voice for the whole video. Change the defaults with repository

@@ -18,13 +18,29 @@ Six series, so the channel feels like a show, not a random feed:
 
 ## Formats
 
-- **Story Short (20–35 s), daily** — hook in the first sentence (≤12 words), one story, one twist, payoff.
-  Rotating formats so nothing feels templated: mystery, you-are-there, myth-vs-fact, one-number,
-  timeline-twist, hidden-detail, unsung-hero, what-if.
-- **Loop Short (5–12 s), daily** — one jaw-dropping fact whose last words run into the first, so it replays.
-- **History movie (~15 min), Wednesday + Sunday** — cold open, promise in 30 s, 6 chapters each ending on an
-  open loop, biggest reveal in chapter 5, chapter cards, end card, thumbnail with 2–4 words.
-  This is the watch-hours engine: Shorts don't count toward the 4,000 hours.
+The Shorts are **cinematic AI video**, not slideshows: every shot is a real generated video clip with natural sound
+(Google's Gemini Omni video model), cut together with narration, music, captions and a hook.
+
+- **POV Short (20–32 s), daily** — the format driving the biggest AI history hits right now: "POV: You're a passenger
+  on the Titanic, 11:40 PM". First-person camera, the viewer's own hands in frame, period-perfect world, second-person
+  narration ("You wake up to..."), the hook written on screen for 3 seconds.
+- **Trailer Short** — the same story cut like a movie trailer: epic establishing shot, rising tension, one reveal.
+- **Time-traveller vlog** (optional, `CINE_FORMATS=pov,trailer,timetraveler`) — a recurring modern character vlogs
+  from inside history; the same face in every shot. Characters build loyal subscribers, but keep the AI label on
+  and the facts tight.
+- **Loop Short (6–10 s), daily** — one breathtaking shot plus one fact that runs back into its own start.
+- **History movie (~15 min), Wednesday + Sunday** — cold open, 6 chapters, open loops; the key scenes (cold open and
+  chapter openers) are real AI video, the rest high-quality pictures with camera moves. This is the watch-hours engine.
+
+Without Gemini billing the same scripts are rendered with pictures and camera moves, and the agent sends you the shot
+prompts so you can make the real-video version free inside YouTube's own apps (YouTube Create / Shorts).
+
+## What AI video costs (Gemini API list price, Nov 2026)
+
+About $0.10 per second at 720p (the agent upscales to 1080p for free). Default caps per video:
+story Short $3 (≈ 30 s of video), loop $1, movie $3 (≈ 4 key scenes) — at most ≈ $4 a day plus ≈ $3 per movie,
+roughly $150 a month if every video uses its full cap. Change the caps with the `SHORT_VIDEO_BUDGET`,
+`LOOP_VIDEO_BUDGET` and `MOVIE_VIDEO_BUDGET` variables (0 = pictures only). The weekly report shows the real spend.
 
 ## The rules the writer follows
 

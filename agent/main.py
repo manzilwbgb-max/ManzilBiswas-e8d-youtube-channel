@@ -15,7 +15,7 @@ import traceback
 
 import requests
 
-from . import gemini, render, scout, store, strategist, telegram, youtube
+from . import gemini, render, scout, store, strategist, telegram, video, youtube
 from .util import DRY, WORK, get_item, items, load, log, now, put, save, slug, stamp, today
 
 GOAL_DATE = dt.date(2027, 2, 1)
@@ -132,11 +132,20 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
             log("trend scout skipped:", e)
     idea = strategist.choose(kind, topic, trends, recent)
     facts = strategist.research(idea, kind)
-    script = strategist.write(kind, idea, facts, recent, trends)
-    spec = strategist.spec(kind, script, idea, p, pictures, motion)
+    cine = strategist.cinematic_mode() and kind in ("story", "loop")
+    budget = video.start(kind)
+    if cine:
+        script = strategist.write_cinematic(kind, idea, facts, recent)
+        spec = strategist.cine_spec(kind, script, idea, p, pictures)
+    else:
+        script = strategist.write(kind, idea, facts, recent, trends)
+        spec = strategist.spec(kind, script, idea, p, pictures, motion)
+    if not budget:
+        spec["motion"] = 0
     rid = f"{stamp()}-{kind}"
     work = os.path.join(WORK, rid)
-    out = render.make(spec, work)
+    out = render.make_cinematic(spec, work) if cine else render.make(spec, work)
+    usd = video.spent()
     meta = strategist.metadata(kind, script, idea, facts, out, p)
     dur = out["duration"]
     warn = list(out.get("warnings", []))
@@ -147,17 +156,19 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
     if kind == "movie" and not 600 <= dur <= 1200:
         warn.append(f"the movie runs {dur / 60:.1f} minutes (aim 13-16)")
     fc = script.get("fact_check", {})
-    srcs = {"gemini": "Gemini AI", "free_ai": "free AI", "archive": "real archive"}
+    srcs = {"video": "AI video", "gemini": "Gemini picture", "free_ai": "free AI picture", "archive": "archive photo"}
     pics = ", ".join(f"{v} {srcs.get(k, k)}" for k, v in out.get("sources", {}).items())
+    if usd:
+        pics += f" · AI video {out.get('video_seconds', 0):.0f}s ≈ ${usd:.2f}"
     mins = f"{dur / 60:.1f} min" if kind == "movie" else f"{dur:.0f} s"
     caption = fit([
         f"🎬 <b>{LABEL[kind]} ready</b> · {mins} · {telegram.esc(idea['series'])}",
         f"<b>{telegram.esc(meta['title'])}</b>",
-        f"Hook: “{telegram.esc(script['scenes'][0]['narration'][:140])}”",
+        f"Hook: “{telegram.esc((script.get('hook_text') if cine else '') or script['scenes'][0]['narration'][:140])}”",
         f"Why now: {telegram.esc(idea.get('why', '')[:160])}" if idea.get("why") else None,
         f"Fact check: {fc.get('confidence', 'unchecked')} ({len(fc.get('changes', []))} fixes)"
         + (f" · source: {telegram.esc(facts['sources'][0]['title'])}" if facts.get("sources") else ""),
-        f"Pictures: {pics} · Voice: {out.get('voice_engine') or '-'}" + (f" · AI motion: {out['motion_clips']}" if out.get("motion_clips") else ""),
+        f"Format: {script.get('format') or idea.get('format', '')} · Shots: {pics} · Voice: {out.get('voice_engine') or '-'}",
         *(f"⚠️ {telegram.esc(w)}" for w in warn[:3]),
         "Not on YouTube yet. Tap a button - I check every hour." if youtube_ready() else
         "YouTube isn't connected yet: save this video and upload it from the YouTube app, then tap ✅.",
@@ -169,7 +180,8 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
            "pinned_comment": meta["pinned_comment"], "series": idea["series"], "format": idea.get("format"),
            "topic": idea["topic"], "idea": idea["id"], "idea_source": idea.get("source"), "why": idea.get("why", ""),
            "made": now().isoformat(), "duration": dur, "status": "waiting", "caption": caption,
-           "fact_check": fc, "sources": facts.get("sources", []), "warnings": warn, "pictures": out.get("sources", {})}
+           "fact_check": fc, "sources": facts.get("sources", []), "warnings": warn, "pictures": out.get("sources", {}),
+           "video_usd": usd}
     if DRY:
         log("DRY RUN - nothing stored or uploaded.", rec["title"], f"{dur:.1f}s", out["video"])
         if has_telegram():
@@ -177,10 +189,15 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
             if out.get("thumbnail"):
                 telegram.send_photo(out["thumbnail"], "Thumbnail")
         return rec
+    if cine and not out.get("sources", {}).get("video") and has_telegram() and not DRY:
+        cards = [f"{i + 1}. {telegram.esc(sh['visual'][:300])}" for i, sh in enumerate(script["shots"])]
+        tell(fit(["🎬 <b>Want this one as real AI video for free?</b> YouTube's own apps (YouTube Create, Shorts) include "
+                  "Google's video model. Paste these shot prompts there, one per clip:", ""] + cards, 4000))
     files = {"video.mp4": out["video"]}
     if out.get("thumbnail"):
         files["thumbnail.jpg"] = out["thumbnail"]
     rec["release"] = store.keep(rid, files, f"{meta['title']}\n\n{meta['description'][:1500]}")
+    video.record_spend(rid, kind)
     put("videos", rid, rec)
     strategist.mark_used(idea, rid)
     if has_telegram():
@@ -617,8 +634,11 @@ def report():
     except Exception as e:
         log("weekly review failed:", e)
     week = [r for r in table if r["age_days"] <= 7]
+    week_ago = (now().date() - dt.timedelta(days=7)).strftime("%Y%m%d")
+    spend = sum(float(x.get("usd", 0)) for n, x in items("spend") if n[:10].replace("-", "") >= week_ago)
     lines = [f"📊 <b>History with Me - weekly report</b> ({now().strftime('%a %d %b')})", ""] + progress_lines(g) + [""]
-    lines.append(f"Last 7 days: {sum(r['kind'] != 'movie' for r in week)} Shorts, {sum(r['kind'] == 'movie' for r in week)} movies published")
+    lines.append(f"Last 7 days: {sum(r['kind'] != 'movie' for r in week)} Shorts, {sum(r['kind'] == 'movie' for r in week)} movies published"
+                 + (f" · AI video spend ≈ ${spend:.2f}" if spend else ""))
     for r in table[:3]:
         lines.append(f"🏆 {telegram.esc(r['title'][:70])} - {r['views']:,} views"
                      + (f", {r['avg_viewed_pct']}% watched" if r.get("avg_viewed_pct") else "")
