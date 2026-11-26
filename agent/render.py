@@ -346,6 +346,9 @@ def pollinations(prompt, out_path, w, h, seed):
     ImageOps.fit(img, (w, h), Image.LANCZOS, centering=(0.5, 0.0)).save(out_path, "JPEG", quality=92)
 
 
+PICTURE_PRICE = float(os.environ.get("PICTURE_PRICE", "0.05"))  # one Gemini picture, booked in the AI budget
+
+
 class Pictures:
     """Tries the best picture source still working, and remembers when one runs out."""
 
@@ -375,7 +378,10 @@ class Pictures:
             if src in self.dead:
                 continue
             if src == "gemini" and not priority and not self._reserve():
-                continue  # paid-picture budget for this video is used up
+                continue  # paid-picture count for this video is used up
+            if src == "gemini" and not video.charge(PICTURE_PRICE, force=priority):
+                self._release(src, priority)
+                continue  # no room left in this video's (or this month's) AI budget
             try:
                 if src == "gemini":
                     try:
@@ -406,9 +412,13 @@ class Pictures:
                 log(f"picture source {src} switched off for this run: {str(e)[:160]}")
                 self.dead.add(src)
                 self._release(src, priority)
+                if src == "gemini":
+                    video.refund(PICTURE_PRICE)
             except Exception as e:
                 log(f"scene {i + 1}: {src} picture failed: {str(e)[:160]}")
                 self._release(src, priority)
+                if src == "gemini":
+                    video.refund(PICTURE_PRICE)
         return None
 
     def _release(self, src, priority):

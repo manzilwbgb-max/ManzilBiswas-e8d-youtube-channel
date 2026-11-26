@@ -1,6 +1,7 @@
 """Real AI video shots with Google's video model (Gemini Omni Flash, Gemini API "interactions").
 Paid only (about $0.10 per second at 720p). Every failure is reported so the caller can fall back to pictures."""
 import base64
+import calendar
 import json
 import os
 import subprocess
@@ -8,7 +9,7 @@ import threading
 import time
 
 from . import gemini
-from .util import http, log, today
+from .util import http, log, now, today
 
 PRICE = {"360p": 0.034, "720p": 0.10, "1080p": 0.15, "4k": 0.30}  # USD per second (Gemini API list price)
 MODELS = [m for m in os.environ.get("VIDEO_MODEL", "gemini-omni-1.1-flash,gemini-omni-flash").split(",") if m.strip()]
@@ -19,13 +20,57 @@ _state = {"dead": None, "spent": 0.0, "budget": 0.0}
 BUDGET_ENV = {"story": ("SHORT_VIDEO_BUDGET", "3"), "loop": ("LOOP_VIDEO_BUDGET", "1"), "movie": ("MOVIE_VIDEO_BUDGET", "3")}
 
 
+def month_cap():
+    """MONTHLY_VIDEO_BUDGET in dollars (None = no monthly cap)."""
+    v = os.environ.get("MONTHLY_VIDEO_BUDGET", "").strip()
+    try:
+        return float(v) if v else None
+    except ValueError:
+        return None
+
+
+def month_spent():
+    from .util import items
+    return round(sum(float(r.get("usd", 0)) for n, r in items("spend") if n.startswith(today()[:7])), 2)
+
+
 def start(kind):
-    """A fresh budget for one video: dollars of AI video it may use (0 = pictures only)."""
+    """A fresh budget for one video: dollars of AI video it may use (0 = pictures only).
+    MONTHLY_VIDEO_BUDGET keeps the month inside a cap, spread evenly over the month (full AI videos every few days
+    instead of all in the first week), so the prepaid Gemini balance never hits $0 - at $0 Google pauses every key,
+    the agent's brain included."""
     env, default = BUDGET_ENV.get(kind, ("SHORT_VIDEO_BUDGET", "3"))
+    budget = float(os.environ.get(env, default) or 0)
+    cap, why = month_cap(), ""
+    if cap is not None and budget > 0:
+        d = now().date()
+        spent = month_spent()
+        left = max(0.0, cap - spent)
+        if left < 0.5:  # not enough for even one shot
+            budget, why = 0.0, "used up"
+        elif spent > cap * d.day / calendar.monthrange(d.year, d.month)[1] + 1e-9:
+            budget, why = 0.0, "pacing"
+        elif left < budget:
+            budget, why = left, "partial"
     with _lock:
         _state["spent"] = 0.0
-        _state["budget"] = float(os.environ.get(env, default) or 0)
+        _state["budget"] = round(budget, 2)
+        _state["why"] = why
     return _state["budget"]
+
+
+def cap_note():
+    """A line for the Telegram caption when the monthly cap changed this video's AI video budget ('' otherwise)."""
+    cap, why = month_cap(), _state.get("why", "")
+    if cap is None or not why:
+        return ""
+    if why == "used up":
+        return (f"This month's AI video budget (${cap:.0f}) is used up, so this one uses pictures until the 1st. "
+                "Raise MONTHLY_VIDEO_BUDGET for more.")
+    if why == "pacing":
+        return (f"Pictures this time: the ${cap:.0f} monthly AI video budget is spread evenly over the month, "
+                "so the next AI video comes in a day or two.")
+    return f"Only ${_state['budget']:.2f} of this month's ${cap:.0f} AI video budget was left for this video."
 
 
 def price(seconds):
@@ -43,7 +88,7 @@ def budget_left():
 
 
 def available():
-    return bool(os.environ.get("GEMINI_API_KEY")) and _state["dead"] is None and \
+    return bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GEMINI_PAID_KEY")) and _state["dead"] is None and \
         os.environ.get("CINEMATIC", "auto").lower() not in ("off", "0", "no")
 
 
@@ -70,7 +115,7 @@ def _find_video(obj):
 
 
 def _download(uri, out):
-    key = gemini.key()
+    key = gemini.key("video")
     if "/files/" in uri and ":download" not in uri:
         for _ in range(60):
             j = http("GET", uri, headers={"x-goog-api-key": key}, timeout=60).json()
@@ -121,7 +166,7 @@ def clip(prompt, aspect, seconds, out_path, refs=None, first_frame=None):
         for model in MODELS:
             b = dict(body, model=model.strip())
             for attempt in range(2):
-                r = http("POST", url, headers={"x-goog-api-key": gemini.key(), "Content-Type": "application/json"},
+                r = http("POST", url, headers={"x-goog-api-key": gemini.key("video"), "Content-Type": "application/json"},
                          data=json.dumps(b), timeout=900, tries=3)
                 if r is not None and r.status_code == 400 and "duration" in r.text.lower() and "duration" in b["response_format"]:
                     b = json.loads(json.dumps(b))
@@ -155,6 +200,20 @@ def clip(prompt, aspect, seconds, out_path, refs=None, first_frame=None):
         _state["dead"] = last
         raise gemini.Fatal("AI video unavailable: " + last)
     raise RuntimeError("AI video failed: " + last)
+
+
+def charge(usd, force=False):
+    """Book one paid picture against this video's AI budget (False = no room left; force books it anyway)."""
+    with _lock:
+        if not force and _state["budget"] - _state["spent"] < usd - 1e-9:
+            return False
+        _state["spent"] += usd
+        return True
+
+
+def refund(usd):
+    with _lock:
+        _state["spent"] = max(0.0, _state["spent"] - usd)
 
 
 def spent():

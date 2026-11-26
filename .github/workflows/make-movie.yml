@@ -2,7 +2,7 @@ name: Make history movie
 # Wednesday and Sunday mornings: one 15-minute history movie, sent to you on Telegram for approval.
 on:
   schedule:
-    - cron: "23 0 * * 0,3"   # 05:53 IST on Sunday and Wednesday
+    - cron: "23 10 * * 0,3"   # 15:53 IST on Sunday and Wednesday
   workflow_dispatch:
     inputs:
       topic:
@@ -49,6 +49,7 @@ jobs:
       - name: Make the movie
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_PAID_KEY: ${{ secrets.GEMINI_PAID_KEY }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
@@ -71,6 +72,7 @@ jobs:
           SHORT_VIDEO_BUDGET: ${{ vars.SHORT_VIDEO_BUDGET || '3' }}
           LOOP_VIDEO_BUDGET: ${{ vars.LOOP_VIDEO_BUDGET || '1' }}
           MOVIE_VIDEO_BUDGET: ${{ vars.MOVIE_VIDEO_BUDGET || '3' }}
+          MONTHLY_VIDEO_BUDGET: ${{ vars.MONTHLY_VIDEO_BUDGET || '10' }}
           DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
           TOPIC: ${{ inputs.topic }}
         run: python -m agent.main make --kind movie --topic "$TOPIC"

@@ -2,7 +2,7 @@ name: Make Shorts
 # Every morning: one story Short (20-35 s) and one loop Short (5-12 s), sent to you on Telegram for approval.
 on:
   schedule:
-    - cron: "41 0 * * *"   # 06:11 IST every day
+    - cron: "41 8 * * *"   # 14:11 IST every day (just after Gemini's free daily allowance refills)
   workflow_dispatch:
     inputs:
       kind:
@@ -49,6 +49,7 @@ jobs:
       - name: Make the Shorts
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_PAID_KEY: ${{ secrets.GEMINI_PAID_KEY }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
@@ -70,6 +71,7 @@ jobs:
           SHORT_VIDEO_BUDGET: ${{ vars.SHORT_VIDEO_BUDGET || '3' }}
           LOOP_VIDEO_BUDGET: ${{ vars.LOOP_VIDEO_BUDGET || '1' }}
           MOVIE_VIDEO_BUDGET: ${{ vars.MOVIE_VIDEO_BUDGET || '3' }}
+          MONTHLY_VIDEO_BUDGET: ${{ vars.MONTHLY_VIDEO_BUDGET || '10' }}
           DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
           KIND: ${{ inputs.kind || 'both' }}
           TOPIC: ${{ inputs.topic }}

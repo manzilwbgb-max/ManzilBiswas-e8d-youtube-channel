@@ -5,7 +5,7 @@ already makes your daily Shorts and movies and sends each finished video to Tele
 and tags ready to copy — you upload it from the YouTube app and tap **✅ I uploaded it**.
 Do step 3 later (on a computer) and the agent uploads by itself after your tap.
 
-You'll create 6 secrets in this GitHub repo: **Settings → Secrets and variables → Actions → New repository secret**.
+You'll create 6 secrets (7 with AI video) in this GitHub repo: **Settings → Secrets and variables → Actions → New repository secret**.
 Never paste these keys into a chat, an issue or a file.
 
 | Secret | What it is |
@@ -13,6 +13,7 @@ Never paste these keys into a chat, an issue or a file.
 | `TELEGRAM_BOT_TOKEN` | your Telegram bot's token (step 1) |
 | `TELEGRAM_CHAT_ID` | your own Telegram chat id (step 1) |
 | `GEMINI_API_KEY` | Gemini API key (step 2) |
+| `GEMINI_PAID_KEY` | optional second Gemini key with billing, for AI video (step 2) |
 | `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN` | permission to post on your channel (step 3) |
 
 A computer browser is easiest for step 3; the rest works from a phone.
@@ -32,12 +33,18 @@ The schedules are already switched on: until the secrets are in, each run just n
 
 1. Open https://aistudio.google.com/apikey → **Create API key** → save it as `GEMINI_API_KEY`.
    The free tier is enough for the agent's brain and, while its quota lasts, the voice.
-2. For cinematic AI video (and Gemini pictures): open https://aistudio.google.com/billing and **set up billing** on
-   the key's project — video has no free tier. Google asks for a small first prepayment, and when the prepaid
-   balance reaches $0 every key on that billing account pauses until you top up, so keep a few dollars in it.
-   Your Gemini (Google AI Pro) app subscription doesn't pay for API calls by itself, but it includes
-   **$10 a month of Google Cloud credit** you can claim on the same billing page (main subscriber only; each
-   month's credit lasts 12 months). See PLAYBOOK.md for what videos cost and how to cap it.
+2. For cinematic AI video (and Gemini pictures) — video has no free tier — make a **second key with billing**,
+   so your first key stays free for writing:
+   1. https://aistudio.google.com/apikey → **Create API key** → **Create API key in new project**.
+   2. https://aistudio.google.com/billing → set up billing **for that new project only**. Google asks for a small
+      first prepayment. Your Gemini (Google AI Pro) plan includes **$10 a month of credit**: claim it on the same
+      page (main subscriber only; each month's credit lasts 12 months).
+   3. Save the new key as the secret `GEMINI_PAID_KEY`.
+
+   The agent then writes scripts and voices on the free key, and uses the paid key only for AI video, AI pictures,
+   and writing on days the free allowance (20 requests per model per day) runs out. AI video and pictures stay inside
+   `MONTHLY_VIDEO_BUDGET` ($10 a month by default), spread evenly over the month. When a prepaid balance reaches $0,
+   Google pauses every key on that billing account, so keep a few dollars in it. See PLAYBOOK.md for costs.
 
 ## 3. YouTube permission (15 min, computer recommended)
 
@@ -76,10 +83,10 @@ From then on everything runs on its own (times in IST):
 
 | Workflow | When |
 |---|---|
-| Make Shorts (story + loop) | every day 06:11 |
-| Make history movie | Wednesday and Sunday 05:53 |
+| Make Shorts (story + loop) | every day 14:11 |
+| Make history movie | Wednesday and Sunday 15:53 |
 | Approvals (Telegram) | every hour 06:37–23:37 |
-| Weekly report | Monday 08:47 |
+| Weekly report | Monday 16:47 |
 
 "Best time" publishes at 19:00 (story), 12:30 (loop) and 18:30 (movie) — change these in `data/plan.json`.
 
@@ -93,6 +100,7 @@ From then on everything runs on its own (times in IST):
 | `CINEMATIC` | `auto` = Shorts are real AI video shots when billing allows; `off` = pictures with camera moves | `auto` |
 | `CINE_FORMATS` | Short formats to rotate: `pov`, `trailer`, `timetraveler` | `pov,trailer` |
 | `SHORT_VIDEO_BUDGET` / `LOOP_VIDEO_BUDGET` / `MOVIE_VIDEO_BUDGET` | most dollars of AI video per video (0 = none) | `3` / `1` / `3` |
+| `MONTHLY_VIDEO_BUDGET` | most dollars of AI video per calendar month; keep it below your prepaid Gemini balance + plan credit | `10` |
 | `VIDEO_RESOLUTION` | `720p` (≈ $0.10/s, upscaled to 1080p for free) or `1080p` (≈ $0.15/s) | `720p` |
 | `MOVIE_MOTION` | how many key movie scenes become AI video | `4` |
 | `VOICE` | `auto`, `gemini`, `free` | `auto` |

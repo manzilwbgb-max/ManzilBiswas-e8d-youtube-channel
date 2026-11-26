@@ -39,8 +39,11 @@ prompts so you can make the real-video version free inside YouTube's own apps (Y
 
 About $0.10 per second at 720p (the agent upscales to 1080p for free). Default caps per video:
 story Short $3 (≈ 30 s of video), loop $1, movie $3 (≈ 4 key scenes) — at most ≈ $4 a day plus ≈ $3 per movie,
-roughly $150 a month if every video uses its full cap. Change the caps with the `SHORT_VIDEO_BUDGET`,
-`LOOP_VIDEO_BUDGET` and `MOVIE_VIDEO_BUDGET` variables (0 = pictures only). The weekly report shows the real spend.
+roughly $150 a month if every video used its full cap. On top of that, `MONTHLY_VIDEO_BUDGET` (default $10)
+caps the whole month: once it is reached, videos use pictures until the 1st. Keep it below your prepaid Gemini
+balance plus your plan's monthly credit, because at $0 Google pauses every key on the account, the agent's brain
+included. Change the per-video caps with the `SHORT_VIDEO_BUDGET`, `LOOP_VIDEO_BUDGET` and `MOVIE_VIDEO_BUDGET`
+variables (0 = pictures only). The weekly report shows the real spend.
 
 ## The rules the writer follows
 

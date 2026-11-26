@@ -6,8 +6,8 @@ makes the pictures and voice, edits the video, and sends it to you on **Telegram
 **Nothing reaches YouTube until you tap a button.**
 
 ```
-06:11 IST every day      ──►  1 cinematic POV/trailer Short (20–32 s) + 1 loop Short (6–10 s)
-05:53 IST Wed & Sun      ──►  1 history movie (≈15 min, 6 chapters, thumbnail)
+14:11 IST every day      ──►  1 cinematic POV/trailer Short (20–32 s) + 1 loop Short (6–10 s)
+15:53 IST Wed & Sun      ──►  1 history movie (≈15 min, 6 chapters, thumbnail)
                                   │
              trend scout → strategist picks topic → Wikipedia research → script
              → fact-check → director's shot list → AI video shots + voice → sound mix, captions, music
@@ -17,7 +17,7 @@ makes the pictures and voice, edits the video, and sends it to you on **Telegram
                                   │
 every hour 06:37–23:37 IST ──►  agent reads your taps → uploads to YouTube
                                 (AI label on) → pinned-comment text → series playlist
-Monday 08:47 IST           ──►  weekly report: progress to monetization + what to double down on
+Monday 16:47 IST           ──►  weekly report: progress to monetization + what to double down on
 ```
 
 ## Talk to it on Telegram

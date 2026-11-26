@@ -17,11 +17,24 @@ from .util import log, parse_json
 API = os.environ.get("GEMINI_API_BASE", "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
 
 
-def key():
-    k = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not k:
+_use_paid = {}  # kind -> True once the free key's allowance ran out in this run
+_paid_dead = []  # set when GEMINI_PAID_KEY turns out to have no billing
+
+
+def paid_key():
+    return "" if _paid_dead else os.environ.get("GEMINI_PAID_KEY", "").strip()
+
+
+def key(kind="text"):
+    """The key for one request. With GEMINI_PAID_KEY set, pictures and video always use it, while the brain and
+    the voice use the free GEMINI_API_KEY until its daily allowance runs out, then the paid key for the rest of the run."""
+    free = os.environ.get("GEMINI_API_KEY", "").strip()
+    paid = paid_key()
+    if paid and (kind in ("image", "video") or _use_paid.get(kind) or not free):
+        return paid
+    if not free:
         raise Fatal("GEMINI_API_KEY is missing. Add it under Settings > Secrets and variables > Actions.")
-    return k
+    return free
 
 
 class Fatal(Exception):
@@ -180,13 +193,14 @@ def quota_verdict(err):
     return ""
 
 
-def post(model, method, body, limiter, timeout=180, tries=6):
+def post(model, method, body, limiter, timeout=180, tries=6, kind="text"):
     url = f"{API}/models/{model}:{method}"
     delay, err, busy = 5.0, "unknown error", 0
     for _ in range(tries):
         limiter.wait()
+        k, paid = key(kind), paid_key()
         try:
-            r = requests.post(url, json=body, headers={"x-goog-api-key": key()}, timeout=timeout)
+            r = requests.post(url, json=body, headers={"x-goog-api-key": k}, timeout=timeout)
         except requests.RequestException as e:
             r, err = None, str(e)
             busy += 1
@@ -198,6 +212,15 @@ def post(model, method, body, limiter, timeout=180, tries=6):
             qs = quota_summary(r.text) if r.status_code == 429 else ""
             err = f"{r.status_code}: " + (f"[{qs}] " if qs else "") + r.text[:300]
             low = r.text.lower()
+            free_tier = r.status_code == 429 and "freetier" in (low + qs.lower()).replace("_", "").replace(" ", "")
+            if free_tier and paid and k != paid and kind in ("text", "tts"):
+                _use_paid[kind] = True
+                log(f"Gemini's free {kind} allowance is used up for today; the paid key takes over for this run")
+                continue
+            if free_tier and paid and k == paid:
+                _paid_dead.append(True)
+                _use_paid.clear()
+                log("GEMINI_PAID_KEY has no billing yet (Google treats it as free tier), so it isn't used this run")
             if r.status_code in (400, 401, 403, 404):
                 raise Fatal(err)
             if r.status_code == 429 and any(w in low for w in ("billing", "prepay", "credit", "free_tier", "free tier", "per day")):
@@ -259,7 +282,7 @@ def image(prompt, aspect, out_path, w, h):
         raise Fatal("No Gemini picture model is available for this key")
     if "imagen" in model:
         j = post(model, "predict", {"instances": [{"prompt": prompt}],
-                                     "parameters": {"sampleCount": 1, "aspectRatio": aspect}}, IMAGE_LIMIT)
+                                     "parameters": {"sampleCount": 1, "aspectRatio": aspect}}, IMAGE_LIMIT, kind="image")
         preds = j.get("predictions") or []
         data = preds[0].get("bytesBase64Encoded") if preds else None
     else:
@@ -269,7 +292,7 @@ def image(prompt, aspect, out_path, w, h):
                    {"responseModalities": ["TEXT", "IMAGE"]}):
             try:
                 j = post(model, "generateContent", {"contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                                                    "generationConfig": gc}, IMAGE_LIMIT)
+                                                    "generationConfig": gc}, IMAGE_LIMIT, kind="image")
             except Fatal as e:
                 if str(e).startswith("400") and "billing" not in str(e).lower():
                     continue
@@ -300,7 +323,7 @@ def tts(text, voice, out_wav):
                     "generationConfig": {"responseModalities": ["AUDIO"],
                                          "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": v}}}}}
             try:
-                j = post(model, "generateContent", body, TTS_LIMIT, timeout=300)
+                j = post(model, "generateContent", body, TTS_LIMIT, timeout=300, kind="tts")
                 break
             except Fatal as e:
                 if v != "Charon" and str(e).startswith("400"):

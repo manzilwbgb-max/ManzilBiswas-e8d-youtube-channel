@@ -160,6 +160,10 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
     pics = ", ".join(f"{v} {srcs.get(k, k)}" for k, v in out.get("sources", {}).items())
     if usd:
         pics += f" · AI video {out.get('video_seconds', 0):.0f}s ≈ ${usd:.2f}"
+        if video.month_cap() is not None:
+            pics += f" (this month ${video.month_spent() + usd:.2f} of ${video.month_cap():.0f})"
+    if video.cap_note():
+        warn.insert(0, video.cap_note())
     mins = f"{dur / 60:.1f} min" if kind == "movie" else f"{dur:.0f} s"
     caption = fit([
         f"🎬 <b>{LABEL[kind]} ready</b> · {mins} · {telegram.esc(idea['series'])}",
@@ -255,8 +259,13 @@ def make(kind, topic=None, pictures=None, motion=None):
         except Exception as e:
             failed += 1
             traceback.print_exc()
-            tell(f"⚠️ Today's {LABEL[k].lower()} failed: <code>{telegram.esc(str(e)[:600])}</code>\n"
-                 f"I'll try again at the next run. If it repeats, open GitHub → Actions to see the log.")
+            why = gemini.quota_verdict(e)
+            if why:
+                tell(f"⚠️ Today's {LABEL[k].lower()} wasn't made: Gemini refused ({telegram.esc(why)}).\n"
+                     "Nothing was paid for. Billing: aistudio.google.com/billing")
+            else:
+                tell(f"⚠️ Today's {LABEL[k].lower()} failed: <code>{telegram.esc(str(e)[:600])}</code>\n"
+                     f"I'll try again at the next run. If it repeats, open GitHub → Actions to see the log.")
     return 1 if failed == len(kinds) else 0
 
 
@@ -795,16 +804,26 @@ def check():
             why = gemini.quota_verdict(e) or ("often Google being overloaded for a while - the agent waits and retries "
                                               "during real runs")
             print(f"❌ Gemini brain test failed: {why}. Google says:", str(e)[:260].replace("\n", " "))
-        try:  # one tiny paid picture (a few cents) tells us whether Gemini billing is on
+        paid = bool(os.environ.get("GEMINI_PAID_KEY", "").strip())
+        try:  # one tiny paid picture (a few cents) tells us whether billing is on (on the paid key when there is one)
             import tempfile
             gemini.image("A small red apple on a wooden table, photo", "1:1", os.path.join(tempfile.gettempdir(), "probe.jpg"), 64, 64)
-            print("✅ Gemini billing is active: AI pictures and cinematic AI video can be used")
+            print("✅ GEMINI_PAID_KEY has billing: AI video and AI pictures are on; the free key still writes the scripts"
+                  if paid else "✅ Gemini billing is active on GEMINI_API_KEY: AI video and AI pictures are on")
+            if video.month_cap() is not None:
+                print(f"   AI budget: ${video.month_cap():.0f} a month, spread evenly over the month; "
+                      f"spent this month: ${video.month_spent():.2f}")
         except Exception as e:
-            why = gemini.quota_verdict(e)
-            print("❌ Gemini billing is not active yet, so no AI video or Gemini pictures (free route only).",
-                  f"Why: {why}." if why else "", "Google says:", str(e)[:260].replace("\n", " "),
-                  "| Fix: aistudio.google.com → API keys → the key's project → Set up billing (it can take a few minutes).")
             ok = False
+            why = gemini.quota_verdict(e)
+            if paid:
+                print("❌ GEMINI_PAID_KEY can't use paid models yet, so no AI video or AI pictures.",
+                      f"Why: {why}." if why else "", "Google says:", str(e)[:200].replace("\n", " "),
+                      "| Fix: aistudio.google.com/billing → set up billing for the paid key's project.")
+            else:
+                print("❌ No Gemini billing yet, so no AI video or Gemini pictures (free route only).",
+                      f"Why: {why}." if why else "", "Google says:", str(e)[:200].replace("\n", " "),
+                      "| Fix: SETUP step 2 - a second key with billing, saved as GEMINI_PAID_KEY.")
     except Exception as e:
         ok = False
         print("❌ Gemini:", e)
