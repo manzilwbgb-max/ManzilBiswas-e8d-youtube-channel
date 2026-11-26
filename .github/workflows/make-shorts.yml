@@ -14,6 +14,10 @@ on:
         description: "Topic (leave empty and the strategist chooses)"
         required: false
         default: ""
+      format:
+        description: "Cinematic format (empty = the strategist picks): pov, trailer or timetraveler"
+        required: false
+        default: ""
       pictures:
         description: "Pictures (auto = Gemini AI if billing is on, else free AI, plus real archive photos)"
         type: choice
@@ -68,7 +72,7 @@ jobs:
           VOICE: ${{ vars.VOICE || 'auto' }}
           MUSIC: ${{ vars.MUSIC || 'on' }}
           CINEMATIC: ${{ vars.CINEMATIC || 'auto' }}
-          CINE_FORMATS: ${{ vars.CINE_FORMATS || 'pov,trailer' }}
+          CINE_FORMATS: ${{ inputs.format || vars.CINE_FORMATS || 'pov,trailer' }}
           VIDEO_RESOLUTION: ${{ vars.VIDEO_RESOLUTION || '720p' }}
           VIDEO_MODEL: ${{ vars.VIDEO_MODEL || 'gemini-omni-1.2-flash,gemini-omni-1.1-flash' }}
           SHORT_VIDEO_BUDGET: ${{ vars.SHORT_VIDEO_BUDGET || '3' }}

@@ -7,6 +7,7 @@ branch="${GITHUB_REF_NAME:-main}"
 git config user.name "history-agent"
 git config user.email "history-agent@users.noreply.github.com"
 git add -A state
+git add -A commands 2>/dev/null || true  # commands the app sent, once carried out
 if git diff --cached --quiet; then
   echo "nothing new to save"
   exit 0

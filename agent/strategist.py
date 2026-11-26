@@ -82,6 +82,17 @@ def formats_for(kind):
 
 # ------------------------------------------------------------------ helpers
 
+SEO = """SEO (YouTube search + Shorts feed), follow exactly:
+- title: at most 60 characters; the searchable subject (person, event, place or year) within the first 40 characters,
+  then a curiosity gap; true to the video; no hashtags or ALL-CAPS sentences in the title.
+- description: line 1 = one hook sentence that contains the exact search phrase people type (e.g. "The Great Stink of
+  1858"); then 2 sentences with the place, year, people and one extra fact not in the video; end with a question.
+- tags: 12-18 tags, in this order: the exact topic keyword; 2-3 spelling or name variations; 3-4 long-tail search
+  questions people type ("what was the great stink"); names, places and years; then broad niche tags ("history",
+  "history facts", "weird history", "history shorts"); never other channels' names.
+- hashtags: exactly 3: #history, #shorts (for Shorts) or #documentary (for long videos), and one specific topic tag."""
+
+
 def plan():
     return data("plan.json")
 
@@ -127,6 +138,14 @@ def _recent_lines(recent):
         return "(none yet)"
     return "\n".join(f"- [{r.get('kind')}] {r.get('title')} | series: {r.get('series')} | format: {r.get('format')}"
                      for r in recent[:12])
+
+
+def _insights():
+    try:
+        from .appdata import insight_lines
+        return insight_lines()
+    except Exception:
+        return ""
 
 
 def _trend_lines(trends, n=10):
@@ -179,6 +198,8 @@ SERIES:
 {chr(10).join(f"- {s['name']}: {s['about']}" for s in p['series'])}
 TRENDING NOW:
 {_trend_lines(trends, 15)}
+WHAT IS WORKING ON OUR CHANNEL (make more ideas like our best performers):
+{_insights() or "(no analytics yet)"}
 OUR RECENT VIDEOS:
 {_recent_lines(recent)}
 Return JSON: {{"ideas": [{{"topic": "...", "angle": "the specific surprising take", "series": "exact series name",
@@ -226,6 +247,8 @@ TRENDING HISTORY {"VIDEOS" if kind == "movie" else "SHORTS"} (topic interest onl
 {_trend_lines(trends)}
 OUR RECENT VIDEOS (avoid repeating topics, openings and formats):
 {_recent_lines(recent)}
+WHAT IS WORKING ON OUR CHANNEL (prefer topics and hooks like the best of these; double down on what keeps viewers):
+{_insights() or "(no analytics yet)"}
 SERIES:
 {chr(10).join(f"- {s['name']}: {s['about']}" for s in p['series'])}
 FORMATS (pick one not used in the last 3 {kind}s: {", ".join(f for f in recent_formats if f) or "none"}):
@@ -359,13 +382,14 @@ OUR RECENT VIDEOS (do not repeat their openings):
 
 Length: {lo}-{hi} spoken words in total (about {secs} seconds) in {slo}-{shi} scenes. Scene 1 is the hook, at most 12 words.
 {ending}
+{SEO}
 Return JSON: {{"title": "max 60 characters, the main keyword early, curiosity without lying",
 "hook_text": "2-5 words shown big on screen during the first 2 seconds",
 "scenes": [{{"narration": "...", "image_prompt": "...", "archive_query": "2-5 words to find a real public-domain photo, painting or artifact of this scene on Wikimedia Commons",
 "visual": "archive if a real photo, painting or artifact of exactly this exists, otherwise ai"}}],
-"description": "2-3 sentences that add one fact not in the video",
-"tags": ["10-15 search tags, most specific first"],
-"hashtags": ["#history", "#shorts", "one or two topic hashtags"],
+"description": "hook sentence with the exact search phrase, then 2 sentences with place, year, people and one extra fact, then a question",
+"tags": ["12-18 tags in the SEO order above"],
+"hashtags": ["#history", "#shorts", "one specific topic hashtag"],
 "pinned_comment": "one question that invites viewers to answer or guess"}}"""
     j = gemini.text_json(prompt, temperature=0.85)
     script = dict(j, topic=idea["topic"])
@@ -509,11 +533,12 @@ Rules
 {'- The vlogger speaks to the camera: put their words in "dialogue" (at most 12 words per shot) and leave "voiceover" empty.' if talk else '- Narration goes in "voiceover" (about 2.5 words per second of the shot); write "no dialogue" into every visual.'}
 - {wlo}-{whi} spoken words in total. Never graphic: show danger and tragedy through faces, sound and aftermath.
 - {ending}
+{SEO}
 Return JSON: {{"title": "max 60 characters, keyword early, curiosity without lying",
 "hook_text": "on-screen text for the first 3 seconds, max 45 characters (e.g. POV: You're a Pompeii baker, 79 AD)",
 "shots": [{{"seconds": 4, "visual": "...", "voiceover": "...", "dialogue": "", "archive_query": "2-5 words for a real photo if one exists"}}],
-"description": "2-3 sentences adding one fact not in the video",
-"tags": ["10-15 search tags"], "hashtags": ["#history", "#shorts", "one topic hashtag"],
+"description": "hook sentence with the exact search phrase, then 2 sentences with place, year, people and one extra fact, then a question",
+"tags": ["12-18 tags in the SEO order above"], "hashtags": ["#history", "#shorts", "one specific topic hashtag"],
 "pinned_comment": "a question viewers want to answer"}}"""
     j = gemini.text_json(prompt, temperature=0.9)
     shots = []

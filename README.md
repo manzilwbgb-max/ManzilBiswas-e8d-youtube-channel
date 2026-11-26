@@ -36,6 +36,21 @@ It checks Telegram once an hour, so give it up to an hour to react.
 **Before YouTube is connected** (SETUP step 3) the agent still makes everything: it sends you the finished video with
 the title, description and tags ready to copy, you upload it from the YouTube app and tap **✅ I uploaded it**.
 
+## Your private app: History with Me Studio
+
+A private Claude app (only you can open it; it uses your own connections) sits on top of this agent:
+
+- **Goal**: days left to 1 Feb 2027, live subscribers (vidIQ), the last 30 days of views and watch time (Windsor.ai),
+  the pace you need against the pace you have, and the fan-funding tier.
+- **Create**: pick Short / Loop / History movie and a format (POV, Trailer, Time-traveller); the agent makes it.
+- **Studio**: finished videos with their SEO pack (title, description, tags, pinned comment), and one-tap
+  **Upload to YouTube** (now, at the best time, or private) through your vidIQ connection, plus Regenerate and Discard.
+- **Ideas**: the strategist's queue and your own ideas.
+- **Coach**: ask the strategist anything; Claude answers with your real numbers.
+
+The app talks to the agent through small files in `commands/` (the *App commands* workflow runs them, for the
+repository owner's own pushes only) and reads `state/app.json`, which every run refreshes.
+
 ## Free or paid — your choice, any time
 
 | Part | Free (no billing) | With Gemini API billing |

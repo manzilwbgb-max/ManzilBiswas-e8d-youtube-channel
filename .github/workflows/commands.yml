@@ -1,0 +1,48 @@
+name: App commands
+# Carries out what you ask in your private History with Me Studio app: the app writes a small file into commands/
+# with your own GitHub account, and this job runs it. It only runs for the repository owner's own pushes.
+on:
+  push:
+    branches: [main]
+    paths: ["commands/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: app-commands
+  cancel-in-progress: false
+jobs:
+  commands:
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install tools
+        run: pip install -q -r requirements.txt
+      - name: Run the app's commands
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_PAID_KEY: ${{ secrets.GEMINI_PAID_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          MONTHLY_VIDEO_BUDGET: ${{ vars.MONTHLY_VIDEO_BUDGET || '10' }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          TEXT_MODEL: ${{ vars.TEXT_MODEL }}
+          TTS_MODEL: ${{ vars.TTS_MODEL }}
+          IMAGE_MODEL: ${{ vars.IMAGE_MODEL }}
+        run: python -m agent.main commands
+      - name: Save the agent's memory
+        if: always()
+        run: bash scripts/save_state.sh "App commands"

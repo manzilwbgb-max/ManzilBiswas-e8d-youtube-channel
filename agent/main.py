@@ -8,6 +8,7 @@
 """
 import argparse
 import datetime as dt
+import json
 import os
 import shutil
 import sys
@@ -16,8 +17,8 @@ import traceback
 
 import requests
 
-from . import freevideo, gemini, render, scout, store, strategist, telegram, video, youtube
-from .util import DRY, WORK, get_item, items, load, log, now, put, save, slug, stamp, today
+from . import appdata, freevideo, gemini, render, scout, store, strategist, telegram, video, youtube
+from .util import DRY, ROOT, WORK, get_item, items, load, log, now, put, save, slug, stamp, today
 
 GOAL_DATE = dt.date(2027, 2, 1)
 GOALS = {"subscribers": 1000, "watch_hours_12m": 4000, "shorts_views_90d": 10_000_000}
@@ -262,22 +263,29 @@ def make(kind, topic=None, pictures=None, motion=None):
     if len(kinds) > 1:
         try:
             trends = scout.trends("short", days=14, max_queries=3)
+            appdata.save_trends(trends)
         except Exception as e:
             trends = []
             log("trend scout skipped:", e)
     for k in kinds:
         try:
-            make_one(k, topic if k == kinds[0] else None, pictures, motion, trends)
+            rec = make_one(k, topic if k == kinds[0] else None, pictures, motion, trends)
+            if not DRY:
+                appdata.record_run(k, True, (rec or {}).get("title", ""), (rec or {}).get("id", ""))
         except Exception as e:
             failed += 1
             traceback.print_exc()
             why = gemini.quota_verdict(e)
+            if not DRY:
+                appdata.record_run(k, False, error=f"Gemini refused: {why}" if why else str(e))
             if why:
                 tell(f"⚠️ Today's {LABEL[k].lower()} wasn't made: Gemini refused ({telegram.esc(why)}).\n"
                      "Nothing was paid for. Billing: aistudio.google.com/billing")
             else:
                 tell(f"⚠️ Today's {LABEL[k].lower()} failed: <code>{telegram.esc(str(e)[:600])}</code>\n"
                      f"I'll try again at the next run. If it repeats, open GitHub → Actions to see the log.")
+    if not DRY:
+        appdata.snapshot()
     return 1 if failed == len(kinds) else 0
 
 
@@ -593,6 +601,124 @@ def approvals():
     except Exception as e:
         log("scheduled check failed:", e)
     log(f"approvals: {len(ups)} updates handled")
+    appdata.snapshot(p)
+    return 0
+
+
+# ------------------------------------------------------------------ commands from the Studio app
+
+APP_FORMATS = {"pov", "trailer", "timetraveler"}
+
+
+def _discard(rid, rec, line):
+    store.forget((rec.get("release") or {}).get("id"))
+    rec.update(status="discarded", release=None)
+    put("videos", rid, rec)
+    if rec.get("message_id"):
+        try:
+            telegram.edit_caption(rec["message_id"], fit([line, ""] + rec.get("caption", rec.get("title", "")).split("\n"),
+                                                         1024), None)
+        except Exception as e:
+            log("couldn't update the Telegram message:", e)
+
+
+def run_command(c, p):
+    """One command the owner sent from the app. Inputs are checked here: only these actions, short plain values."""
+    action = str(c.get("action", "")).lower()
+    topic = " ".join(str(c.get("topic") or "").split())[:200]
+    if action in ("make", "movie"):
+        kind = "movie" if action == "movie" else str(c.get("kind") or "story")
+        if kind not in ("story", "loop", "both", "movie"):
+            kind = "story"
+        fmt = str(c.get("format") or "").lower()
+        inputs = {"topic": topic}
+        if kind != "movie":
+            inputs["kind"] = kind
+            if fmt in APP_FORMATS:
+                inputs["format"] = fmt
+        ok = dispatch("make-movie.yml" if kind == "movie" else "make-shorts.yml", inputs)
+        what = {"story": "Short", "loop": "loop Short", "both": "Short and a loop Short", "movie": "history movie"}[kind]
+        tell(f"📱 From your app: making a {what}{' about ' + telegram.esc(topic) if topic else ''}"
+             f"{' (' + fmt + ')' if fmt in APP_FORMATS and kind != 'movie' else ''}. "
+             f"Preview here in about {'40' if kind == 'movie' else '10'} minutes." if ok else
+             "📱 The app asked for a video, but I couldn't start the run - open GitHub → Actions.")
+    elif action in ("remake", "discard"):
+        rid = str(c.get("id") or "")[:80]
+        rec = get_item("videos", rid) if rid else None
+        if not rec or rec.get("status") != "waiting":
+            tell("📱 That video isn't waiting for approval any more, so I left it alone.")
+            return
+        if action == "discard":
+            _discard(rid, rec, "🗑 Discarded from the app. Nothing was uploaded.")
+            tell(f"🗑 Discarded from the app: {telegram.esc(rec.get('title', ''))}")
+        else:
+            _discard(rid, rec, "🔁 Remaking this one from the app...")
+            ok = remake(rec["kind"], rec.get("topic"))
+            tell(f"🔁 Making a fresh AI version of <b>{telegram.esc(rec.get('title', ''))}</b>." if ok else
+                 "🔁 Discarded, but I couldn't start the new run - open GitHub → Actions.")
+    elif action in ("share", "uploaded"):
+        rid = str(c.get("id") or "")[:80]
+        rec = get_item("videos", rid) if rid else None
+        if not rec or rec.get("status") != "waiting" or not (rec.get("release") or {}).get("id"):
+            log("share/uploaded: video not waiting:", rid)
+            return
+        if action == "share":
+            if not (rec.get("public") or {}).get("video"):
+                links = store.share(rec["release"]["id"])
+                rec["public"] = {"video": links.get("video.mp4", ""), "thumbnail": links.get("thumbnail.jpg", ""),
+                                 "at": now().isoformat()}
+                put("videos", rid, rec)
+            return
+        store.forget(rec["release"]["id"], tag=f"pending-{rid}" if rec.get("public") else None)
+        when = str(c.get("publish_at") or "")[:30]
+        privacy = str(c.get("privacy") or "public")[:10]
+        rec.update(status="uploaded", release=None, public=None, uploaded=now().isoformat(), uploaded_via="vidIQ",
+                   youtube_post=str(c.get("post_id") or "")[:80], privacy=privacy, publish_at=when or None)
+        put("videos", rid, rec)
+        line = (f"✅ Sent to YouTube from the app ({'scheduled ' + when if when else privacy}). "
+                "In YouTube Studio set Altered or synthetic content: Yes, and pin the comment below.")
+        if rec.get("message_id"):
+            try:
+                telegram.edit_caption(rec["message_id"], fit([line, ""] + rec.get("caption", rec["title"]).split("\n"), 1024))
+            except Exception as e:
+                log("couldn't update the Telegram message:", e)
+        tell(f"✅ <b>{telegram.esc(rec['title'])}</b> is on its way to YouTube.\n"
+             "Studio → Content → this video → Details: set <b>Altered or synthetic content</b> to Yes.\n"
+             f"Pin this comment: {telegram.esc(rec.get('pinned_comment', ''))}")
+    elif action == "idea":
+        kind = str(c.get("kind") or "story")
+        kind = kind if kind in ("story", "loop", "movie") else "story"
+        if topic:
+            put("inbox", f"{stamp()}-{slug(topic, 30)}", {"kind": kind, "topic": topic, "added": now().isoformat(),
+                                                           "angle": " ".join(str(c.get("angle") or "").split())[:200]})
+            tell(f"💡 Saved from the app for the next {LABEL[kind].lower()}: {telegram.esc(topic)}")
+    elif action in ("pause", "resume"):
+        save("control.json", {"paused": action == "pause", "changed": now().isoformat()})
+        tell("⏸ Paused from the app." if action == "pause" else "▶️ Daily videos back on (from the app).")
+    elif action == "insights":
+        save("insights.json", appdata.clean_insights(c))
+    elif action != "refresh":
+        log("unknown command ignored:", action)
+
+
+def commands():
+    """Carry out what the owner asked in the Studio app (files in commands/, pushed with their own GitHub account)."""
+    folder = os.path.join(ROOT, "commands")
+    p = plan()
+    files = sorted(f for f in os.listdir(folder) if f.endswith(".json")) if os.path.isdir(folder) else []
+    for name in files[:20]:
+        path = os.path.join(folder, name)
+        try:
+            with open(path, encoding="utf-8") as f:
+                c = json.load(f)
+            if isinstance(c, dict):
+                run_command(c, p)
+        except Exception as e:
+            traceback.print_exc()
+            tell(f"⚠️ An app command didn't work: <code>{telegram.esc(str(e)[:300])}</code>")
+        os.remove(path)
+    log(f"commands: {len(files)} handled")
+    appdata.snapshot(p)
     return 0
 
 
@@ -693,6 +819,7 @@ def report():
         lines += ["", "Queued follow-ups: " + "; ".join(telegram.esc(x.get("topic", "")) for x in dd[:3])]
     tell("\n".join(lines)[:4000])
     put("reports", today(), {"progress": g, "videos": table, "review": review})
+    appdata.snapshot(p)
     return 0
 
 
@@ -944,7 +1071,7 @@ def main(argv=None):
     mk.add_argument("--topic", default="")
     mk.add_argument("--pictures", default="", choices=["", "auto", "gemini", "free", "archive"])
     mk.add_argument("--motion", type=int, default=None)
-    for name in ("approvals", "report", "scout", "demo"):
+    for name in ("approvals", "report", "scout", "demo", "commands", "snapshot"):
         sub.add_parser(name)
     ck = sub.add_parser("check")
     ck.add_argument("--video", action="store_true", help="also make one free AI video test clip")
@@ -955,7 +1082,9 @@ def main(argv=None):
         return make(a.kind, a.topic.strip() or None, a.pictures or None, a.motion)
     if a.cmd == "check":
         return check(video_test=a.video)
-    return {"approvals": approvals, "report": report, "scout": scout_cmd, "demo": demo}[a.cmd]()
+    if a.cmd == "snapshot":
+        return 0 if appdata.snapshot() is not None else 1
+    return {"approvals": approvals, "report": report, "scout": scout_cmd, "demo": demo, "commands": commands}[a.cmd]()
 
 
 if __name__ == "__main__":

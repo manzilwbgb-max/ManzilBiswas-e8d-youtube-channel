@@ -74,7 +74,23 @@ def fetch(asset_id, out_path):
     raise RuntimeError("could not fetch the stored video (too many redirects)")
 
 
-def forget(release_id):
+def share(release_id):
+    """Make one kept video downloadable by a public link, so the Studio app can hand it to vidIQ for the YouTube
+    upload. The copy is deleted again (forget with its tag) as soon as the upload is done."""
+    r = requests.patch(f"{API}/repos/{_repo()}/releases/{release_id}", headers=_h(), timeout=60,
+                       json={"draft": False, "prerelease": True})
+    if r.status_code != 200:
+        raise RuntimeError("could not make the video downloadable: " + r.text[:300])
+    rel = r.json()
+    return {a["name"]: a.get("browser_download_url", "") for a in rel.get("assets", [])}
+
+
+def forget(release_id, tag=None):
+    if tag:  # a shared copy also left a tag behind
+        try:
+            requests.delete(f"{API}/repos/{_repo()}/git/refs/tags/{tag}", headers=_h(), timeout=60)
+        except requests.RequestException as e:
+            log("could not delete the tag:", e)
     try:
         requests.delete(f"{API}/repos/{_repo()}/releases/{release_id}", headers=_h(), timeout=60)
     except requests.RequestException as e:
