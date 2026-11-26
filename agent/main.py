@@ -730,8 +730,16 @@ def check():
     try:
         m = gemini.models()
         print("✅ Gemini key works. Models:", m)
-        print("   AI pictures:", "available (needs billing to actually draw)" if m.get("image") else "not available on this key")
         print("   Brain test:", gemini.text_json('Reply with JSON {"ok": true}', temperature=0, max_tokens=2000))
+        try:  # one tiny paid picture (a few cents) tells us whether Gemini billing is on
+            import tempfile
+            gemini.image("A small red apple on a wooden table, photo", "1:1", os.path.join(tempfile.gettempdir(), "probe.jpg"), 64, 64)
+            print("✅ Gemini billing is active: AI pictures and cinematic AI video can be used")
+        except Exception as e:
+            print("❌ Gemini billing is not active yet, so no AI video or Gemini pictures (free route only).",
+                  "Google says:", str(e)[:200].replace("\n", " "),
+                  "| Fix: aistudio.google.com → API keys → the key's project → Set up billing (it can take a few minutes).")
+            ok = False
     except Exception as e:
         ok = False
         print("❌ Gemini:", e)
