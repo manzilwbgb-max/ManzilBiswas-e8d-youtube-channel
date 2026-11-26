@@ -1,4 +1,9 @@
-# One-time setup (about 30–40 minutes)
+# One-time setup
+
+**Fastest start, all from your phone (about 10 minutes):** do steps 1 and 2 only. With those 3 secrets the agent
+already makes your daily Shorts and movies and sends each finished video to Telegram with the title, description
+and tags ready to copy — you upload it from the YouTube app and tap **✅ I uploaded it**.
+Do step 3 later (on a computer) and the agent uploads by itself after your tap.
 
 You'll create 6 secrets in this GitHub repo: **Settings → Secrets and variables → Actions → New repository secret**.
 Never paste these keys into a chat, an issue or a file.
@@ -56,6 +61,9 @@ Telegram and the free voice, and lists anything missing. Your bot says *"History
 
 ## 5. First test run
 
+Want to see the free production line first? **Actions → Demo Short (free) → Run workflow** makes one real Short with
+no keys at all (free pictures, archive photos, free voice); with Telegram set up it arrives in your chat.
+
 **Actions → Make Shorts → Run workflow**, tick **Test only** → in about 10 minutes the preview arrives on Telegram
 (nothing is kept or uploaded). Then run it again without *Test only*, tap **✅ Publish now** under the preview,
 and within an hour the Short is live. You can also start **Approvals (Telegram)** by hand to act at once.
@@ -82,8 +90,10 @@ From then on everything runs on its own (times in IST):
 | `VOICE` | `auto`, `gemini`, `free` | `auto` |
 | `TEXT_MODEL`, `TTS_MODEL`, `IMAGE_MODEL` | pin a Gemini model; empty = newest Flash model the key can use | empty |
 
-Secret `POLLINATIONS_TOKEN` (optional): without it, free AI pictures come one every ~15 seconds and may carry a small
-logo (the agent crops the bottom edge). A free account at https://auth.pollinations.ai gives a token that removes both.
+Secret `POLLINATIONS_TOKEN` (recommended if you stay on the free route): without it, the free AI picture service is slow
+(about one picture every 15 seconds) and in our first real run it refused about half the requests — the agent then used
+real archive photos instead. A free account at https://auth.pollinations.ai gives a token that makes free AI pictures
+reliable. With Gemini billing on, Gemini draws the pictures and this doesn't matter.
 
 ## 7. Music (optional, recommended)
 

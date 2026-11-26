@@ -53,8 +53,17 @@ def commons_search(query, n=12, min_side=800):
     return out
 
 
-def commons_picture(query, out_path, w, h, avoid=()):
-    """Save the first public-domain picture for the query that is not in `avoid`. Returns its info or None."""
+def fingerprint(img):
+    """64-bit average hash: near-identical photos get near-identical fingerprints."""
+    g = ImageOps.grayscale(img).resize((8, 8), Image.LANCZOS)
+    px = list(g.getdata())
+    avg = sum(px) / 64.0
+    return sum(1 << i for i, v in enumerate(px) if v > avg)
+
+
+def commons_picture(query, out_path, w, h, avoid=(), hashes=None, lock=None):
+    """Save the first public-domain picture for the query that isn't already used (by link or by look).
+    Returns its info or None."""
     for item in commons_search(query):
         if item["url"] in avoid:
             continue
@@ -63,6 +72,15 @@ def commons_picture(query, out_path, w, h, avoid=()):
             if r.status_code != 200:
                 continue
             img = Image.open(io.BytesIO(r.content)).convert("RGB")
+            if hashes is not None:
+                fp = fingerprint(img)
+                if any(bin(fp ^ x).count("1") <= 6 for x in hashes):
+                    continue  # same photo as one already in this video
+                if lock:
+                    with lock:
+                        hashes.append(fp)
+                else:
+                    hashes.append(fp)
             ImageOps.fit(img, (w, h), Image.LANCZOS, centering=(0.5, 0.4)).save(out_path, "JPEG", quality=92)
             return item
         except Exception as e:

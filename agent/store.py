@@ -34,7 +34,7 @@ def keep(rec_id, files, note=""):
     if r.status_code not in (200, 201):
         raise RuntimeError("could not store the video on GitHub: " + r.text[:300])
     rel = r.json()
-    out = {"id": rel["id"], "assets": {}}
+    out = {"id": rel["id"], "assets": {}, "links": {}}
     for name, path in files.items():
         mime = "video/mp4" if name.endswith(".mp4") else "image/jpeg"
         for attempt in range(3):
@@ -44,6 +44,7 @@ def keep(rec_id, files, note=""):
                                       headers=_h({"Content-Type": mime}), data=f, timeout=(30, 1800))
                 if a.status_code in (200, 201):
                     out["assets"][name] = a.json()["id"]
+                    out["links"][name] = a.json().get("browser_download_url", "")
                     break
                 log("store upload refused:", a.status_code, a.text[:200])
             except requests.RequestException as e:

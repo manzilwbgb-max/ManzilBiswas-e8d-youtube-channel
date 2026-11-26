@@ -33,6 +33,9 @@ Monday 08:47 IST           ──►  weekly report: progress to monetization + 
 
 It checks Telegram once an hour, so give it up to an hour to react.
 
+**Before YouTube is connected** (SETUP step 3) the agent still makes everything: it sends you the finished video with
+the title, description and tags ready to copy, you upload it from the YouTube app and tap **✅ I uploaded it**.
+
 ## Free or paid — your choice, any time
 
 | Part | Free (no billing) | With Gemini API billing |

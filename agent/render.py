@@ -355,6 +355,7 @@ class Pictures:
                       "archive": ["archive", "free_ai"]}.get(mode, ["gemini", "free_ai", "archive"])
         self.style, self.aspect, self.w, self.h, self.topic = style, aspect, w, h, topic
         self.dead, self.used_urls, self.lock, self.used = set(), set(), threading.Lock(), {}
+        self.hashes = []  # fingerprints of archive photos already used in this video
         self.cap, self.reserved = int(os.environ.get("AI_PICTURES_MAX", "0") or 0), 0  # paid pictures per video (0 = no cap)
 
     def _reserve(self):
@@ -365,7 +366,7 @@ class Pictures:
             return True
 
     def make(self, i, scene, out_path, priority=False):
-        prompt = f"{self.style}. {scene['image_prompt']}. {NO_TEXT}"
+        prompt = f"{scene['image_prompt']}. Style: {self.style}. {NO_TEXT}"
         order = list(self.order)
         if scene.get("visual") == "archive" and "archive" in order and self.mode != "archive":
             order.remove("archive")
@@ -380,10 +381,10 @@ class Pictures:
                     try:
                         gemini.image(prompt, self.aspect, out_path, self.w, self.h)
                     except RuntimeError:
-                        gemini.image(f"{self.style}. A tasteful, non-graphic scene: {SOFTEN.sub('', scene['image_prompt'])}. "
-                                     f"{NO_TEXT}", self.aspect, out_path, self.w, self.h)
+                        gemini.image(f"A tasteful, non-graphic scene: {SOFTEN.sub('', scene['image_prompt'])}. "
+                                     f"Style: {self.style}. {NO_TEXT}", self.aspect, out_path, self.w, self.h)
                 elif src == "free_ai":
-                    pollinations(f"{self.style}, {SOFTEN.sub('', scene['image_prompt'])}, cinematic film still, no text",
+                    pollinations(f"{SOFTEN.sub('', scene['image_prompt'])}. {self.style}. Cinematic film still, no text",
                                  out_path, self.w, self.h, seed=1000 + i * 7)
                 else:
                     item = None
@@ -391,7 +392,7 @@ class Pictures:
                         if q:
                             with self.lock:
                                 avoid = set(self.used_urls)
-                            item = sources.commons_picture(q, out_path, self.w, self.h, avoid)
+                            item = sources.commons_picture(q, out_path, self.w, self.h, avoid, self.hashes, self.lock)
                             if item:
                                 with self.lock:
                                     self.used_urls.add(item["url"])
@@ -679,3 +680,15 @@ def make(spec, work):
         compose_thumbnail(thumb_src or os.path.join(d, "img_000.jpg"), spec.get("thumbnail", {}).get("text", ""), thumb)
         out["thumbnail"] = thumb
     return out
+
+
+def fit_size(path, out_path, max_mb=48):
+    """Return path if it is small enough, otherwise a re-encoded copy that fits (Telegram bots can send up to 50 MB)."""
+    if os.path.getsize(path) <= max_mb * 1024 * 1024:
+        return path
+    dur = max(probe_duration(path), 1.0)
+    kbps = max(int(max_mb * 8 * 1024 * 0.92 / dur) - 160, 800)
+    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", path, "-c:v", "libx264", "-preset", "veryfast",
+         "-b:v", f"{kbps}k", "-maxrate", f"{kbps}k", "-bufsize", f"{kbps * 2}k", "-pix_fmt", "yuv420p", "-c:a", "aac",
+         "-b:a", "128k", "-movflags", "+faststart", out_path])
+    return out_path

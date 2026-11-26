@@ -45,12 +45,12 @@ def send(text, rows=None):
     return call("sendMessage", **kw)
 
 
-def send_video(path, caption, rows=None):
+def send_video(path, caption, rows=None, filename="preview.mp4"):
     data = dict(chat_id=chat(), caption=caption[:1024], parse_mode="HTML", supports_streaming="true")
     if rows:
         data["reply_markup"] = keyboard(rows)
     with open(path, "rb") as f:
-        return call("sendVideo", files={"video": ("preview.mp4", f, "video/mp4")}, **data)
+        return call("sendVideo", files={"video": (filename, f, "video/mp4")}, **data)
 
 
 def send_photo(path, caption):

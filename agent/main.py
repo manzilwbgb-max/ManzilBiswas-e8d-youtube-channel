@@ -25,6 +25,7 @@ HELP = """<b>History with Me agent</b> - I make history Shorts and movies and wa
 
 <b>Buttons under each video</b>
 ✅ Publish now · ⏰ Best time (scheduled) · 🔒 Private upload · 🔁 Remake · 🗑 Discard
+Until YouTube is connected I send you the finished file to upload from the YouTube app, then you tap ✅ I uploaded it.
 I check Telegram every hour, then act and update the message.
 
 <b>Commands</b> (or just write normally)
@@ -83,9 +84,27 @@ def slot_label(kind, p):
     return dt.time(h, m).strftime("%I:%M %p").lstrip("0") + " IST"
 
 
-def buttons(rid, kind, p):
+def youtube_ready():
+    return all(os.environ.get(k, "").strip() for k in ("YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN"))
+
+
+def buttons(rid, kind, p, phone=None):
+    if phone if phone is not None else not youtube_ready():
+        return [[("✅ I uploaded it", f"up:{rid}")], [("🔁 Remake", f"re:{rid}"), ("🗑 Discard", f"del:{rid}")]]
     return [[("✅ Publish now", f"pub:{rid}"), (f"⏰ {slot_label(kind, p)}", f"sch:{rid}")],
             [("🔒 Private", f"prv:{rid}"), ("🔁 Remake", f"re:{rid}"), ("🗑 Discard", f"del:{rid}")]]
+
+
+def copy_pack(meta, kind, p):
+    """Everything to paste into the YouTube app, as tap-to-copy blocks."""
+    e = telegram.esc
+    return "\n".join([
+        "📋 <b>Copy into the YouTube app</b>", "", "<b>Title</b>", f"<code>{e(meta['title'])}</code>", "",
+        "<b>Description</b>", f"<pre>{e(meta['description'][:2600])}</pre>", "",
+        "<b>Tags</b> (Show more → Tags)", f"<code>{e(', '.join(meta['tags']))[:600]}</code>", "",
+        "⚙️ Altered or synthetic content: <b>Yes</b> · Made for kids: <b>No</b>",
+        f"⏰ Best time to post: {slot_label(kind, p)}",
+        "Pinned comment: " + (f"<code>{e(meta['pinned_comment'])}</code>" if meta.get("pinned_comment") else "-")])
 
 
 def fit(lines, limit=1000):
@@ -140,7 +159,8 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
         + (f" · source: {telegram.esc(facts['sources'][0]['title'])}" if facts.get("sources") else ""),
         f"Pictures: {pics} · Voice: {out.get('voice_engine') or '-'}" + (f" · AI motion: {out['motion_clips']}" if out.get("motion_clips") else ""),
         *(f"⚠️ {telegram.esc(w)}" for w in warn[:3]),
-        "Not on YouTube yet. Tap a button - I check every hour.",
+        "Not on YouTube yet. Tap a button - I check every hour." if youtube_ready() else
+        "YouTube isn't connected yet: save this video and upload it from the YouTube app, then tap ✅.",
     ])
     if kind == "movie":
         caption = fit([caption, "", "<b>Chapters</b>"] + [f"{strategist._stamp_time(c['start'])} {telegram.esc(c['title'])}"
@@ -164,9 +184,27 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
     put("videos", rid, rec)
     strategist.mark_used(idea, rid)
     if has_telegram():
+        phone = not youtube_ready()
         if out.get("thumbnail"):
-            telegram.send_photo(out["thumbnail"], f"Thumbnail for: <b>{telegram.esc(meta['title'])}</b>")
-        msg = telegram.send_video(out["preview"], caption, buttons(rid, kind, p))
+            if phone:
+                telegram.send_document(out["thumbnail"], f"Thumbnail for: <b>{telegram.esc(meta['title'])}</b>",
+                                       filename="thumbnail.jpg", mime="image/jpeg")
+            else:
+                telegram.send_photo(out["thumbnail"], f"Thumbnail for: <b>{telegram.esc(meta['title'])}</b>")
+        if phone:
+            if kind == "movie":
+                link_ = (rec["release"].get("links") or {}).get("video.mp4", "")
+                caption = fit([caption, "", f"Full movie (sign in to GitHub to download): {link_}" if link_ else
+                               "Full movie: GitHub → your repo → Releases (draft)."], 1024)
+                msg = telegram.send_video(out["preview"], caption, buttons(rid, kind, p, phone=True))
+            else:
+                final = render.fit_size(out["video"], os.path.join(work, "telegram.mp4"))
+                msg = telegram.send_video(final, caption, buttons(rid, kind, p, phone=True),
+                                          filename=f"{slug(meta['title'], 50)}.mp4")
+            telegram.send(copy_pack(meta, kind, p))
+        else:
+            msg = telegram.send_video(out["preview"], caption, buttons(rid, kind, p))
+        rec["caption"] = caption
         rec["message_id"] = msg.get("message_id")
         put("videos", rid, rec)
     shutil.rmtree(work, ignore_errors=True)
@@ -306,11 +344,18 @@ def handle_tap(tap, p):
         rest = base.replace("Not on YouTube yet. Tap a button - I check every hour.", "").strip().split("\n")
         telegram.edit_caption(mid, fit([line, ""] + rest, 1024), rows)
 
-    if status in ("published", "scheduled", "private", "discarded", "deleted") and action not in ("back",):
+    if status in ("published", "scheduled", "private", "discarded", "deleted", "uploaded") and action not in ("back",):
         telegram.answer(tap.get("id", ""), f"Already {status}")
         return True
     note = ""
-    if action == "pub":
+    if action in ("pub", "sch", "prv") and not youtube_ready():
+        telegram.answer(tap.get("id", ""), "YouTube isn't connected yet - upload it from the app, then tap ✅ I uploaded it")
+        return True
+    if action == "up":
+        store.forget((rec.get("release") or {}).get("id"))
+        rec.update(status="uploaded", release=None, uploaded=now().isoformat())
+        note = "✅ Marked as uploaded. Remember: pin the comment and set the Related video in YouTube Studio."
+    elif action == "pub":
         to_youtube(rec, "public")
         st = youtube.status([rec["video_id"]]).get(rec["video_id"], {})
         if st.get("privacyStatus") == "public":
@@ -339,7 +384,8 @@ def handle_tap(tap, p):
         telegram.answer(tap.get("id", ""), "Sure?")
         return True
     elif action == "back":
-        telegram.edit_caption(mid, base, buttons(rid, rec["kind"], p) if rec.get("status") == "waiting" else None)
+        telegram.edit_caption(mid, base, buttons(rid, rec["kind"], p, phone=rec.get("video_id") is None and not youtube_ready())
+                              if rec.get("status") == "waiting" else None)
         return True
     elif action == "del!":
         store.forget((rec.get("release") or {}).get("id"))
@@ -375,11 +421,13 @@ def finish_scheduled(p):
 
 def status_text(p):
     lines = []
-    try:
-        g = progress()
-        lines += progress_lines(g)
-    except Exception as e:
-        lines.append(f"(YouTube numbers unavailable: {telegram.esc(str(e)[:160])})")
+    if not youtube_ready():
+        lines.append("YouTube isn't connected yet (SETUP step 3), so I can't read your numbers.")
+    else:
+        try:
+            lines += progress_lines(progress())
+        except Exception as e:
+            lines.append(f"(YouTube numbers unavailable: {telegram.esc(str(e)[:160])})")
     waiting = [r for _, r in items("videos") if r.get("status") == "waiting"]
     sched = [r for _, r in items("videos") if r.get("status") == "scheduled"]
     lines += ["", f"Waiting for you: {len(waiting)} · Scheduled: {len(sched)}",
@@ -482,7 +530,8 @@ def approvals():
             tell(f"⚠️ That didn't work: <code>{telegram.esc(str(e)[:500])}</code>")
     save("telegram.json", st)
     try:
-        finish_scheduled(p)
+        if youtube_ready():
+            finish_scheduled(p)
     except Exception as e:
         log("scheduled check failed:", e)
     log(f"approvals: {len(ups)} updates handled")
@@ -669,8 +718,12 @@ def check():
         g = progress()
         print("   Progress:", g)
     except Exception as e:
-        ok = False
-        print("❌ YouTube:", e)
+        if youtube_ready():
+            ok = False
+            print("❌ YouTube:", e)
+        else:
+            print("ℹ️ YouTube not connected yet: finished videos come to Telegram and you upload them from the YouTube app."
+                  " SETUP step 3 makes uploading automatic.")
     if os.environ.get("TELEGRAM_BOT_TOKEN") and not telegram.chat():
         try:
             seen = {}
@@ -707,7 +760,7 @@ def check():
 
 
 NEEDS = {"make": ["GEMINI_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"],
-         "approvals": ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN"],
+         "approvals": ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"],
          "report": ["GEMINI_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "YT_CLIENT_ID", "YT_CLIENT_SECRET",
                     "YT_REFRESH_TOKEN"]}
 
