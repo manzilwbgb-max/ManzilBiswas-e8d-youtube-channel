@@ -730,7 +730,12 @@ def check():
     try:
         m = gemini.models()
         print("✅ Gemini key works. Models:", m)
-        print("   Brain test:", gemini.text_json('Reply with JSON {"ok": true}', temperature=0, max_tokens=2000))
+        try:
+            print("   Brain test:", gemini.text_json('Reply with JSON {"ok": true}', temperature=0, max_tokens=2000))
+        except Exception as e:
+            ok = False
+            print("❌ Gemini brain test failed (often Google being overloaded for a while - the agent waits and retries "
+                  "during real runs):", str(e)[:200].replace("\n", " "))
         try:  # one tiny paid picture (a few cents) tells us whether Gemini billing is on
             import tempfile
             gemini.image("A small red apple on a wooden table, photo", "1:1", os.path.join(tempfile.gettempdir(), "probe.jpg"), 64, 64)
@@ -758,6 +763,8 @@ def check():
                   " SETUP step 3 makes uploading automatic.")
     if os.environ.get("TELEGRAM_BOT_TOKEN") and not telegram.chat():
         try:
+            me = telegram.call("getMe")
+            print(f"✅ Telegram bot token works (@{me.get('username', '?') if isinstance(me, dict) else '?'})")
             seen = {}
             for u in telegram.updates(0):
                 c = ((u.get("message") or {}).get("chat")) or {}
@@ -772,7 +779,8 @@ def check():
             if not seen:
                 print("ℹ️ Send any message to your bot on Telegram, then run Check setup again to get your chat id.")
         except Exception as e:
-            print("❌ Telegram:", e)
+            print("❌ Telegram:", e, "| If it says Unauthorized, the TELEGRAM_BOT_TOKEN secret is not the bot's token: "
+                  "copy it again from @BotFather → /mybots → your bot → API Token.")
         ok = False
     elif has_telegram():
         try:

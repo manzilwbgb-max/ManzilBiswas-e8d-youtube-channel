@@ -123,7 +123,8 @@ def _fallback(kind, failed, err, busy=False):
         log(f"Gemini {kind} model {failed} {'busy' if busy else 'refused'} ({str(err)[:120]}); switching to {order[0]}")
         _models[kind] = order[0]
         return True
-    if busy and _rounds.get(kind, 0) < 3:
+    left = [n for n in _all.get(kind, []) if n not in _banned]
+    if (busy or left) and left and _rounds.get(kind, 0) < 3:
         _rounds[kind] = _rounds.get(kind, 0) + 1
         wait = 45 * _rounds[kind]
         log(f"all Gemini {kind} models are busy right now; waiting {wait}s and trying again")
