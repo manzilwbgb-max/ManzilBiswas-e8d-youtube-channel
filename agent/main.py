@@ -792,15 +792,17 @@ def check():
             print("   Brain test:", gemini.text_json('Reply with JSON {"ok": true}', temperature=0, max_tokens=2000))
         except Exception as e:
             ok = False
-            print("❌ Gemini brain test failed (often Google being overloaded for a while - the agent waits and retries "
-                  "during real runs):", str(e)[:200].replace("\n", " "))
+            why = gemini.quota_verdict(e) or ("often Google being overloaded for a while - the agent waits and retries "
+                                              "during real runs")
+            print(f"❌ Gemini brain test failed: {why}. Google says:", str(e)[:260].replace("\n", " "))
         try:  # one tiny paid picture (a few cents) tells us whether Gemini billing is on
             import tempfile
             gemini.image("A small red apple on a wooden table, photo", "1:1", os.path.join(tempfile.gettempdir(), "probe.jpg"), 64, 64)
             print("✅ Gemini billing is active: AI pictures and cinematic AI video can be used")
         except Exception as e:
+            why = gemini.quota_verdict(e)
             print("❌ Gemini billing is not active yet, so no AI video or Gemini pictures (free route only).",
-                  "Google says:", str(e)[:200].replace("\n", " "),
+                  f"Why: {why}." if why else "", "Google says:", str(e)[:260].replace("\n", " "),
                   "| Fix: aistudio.google.com → API keys → the key's project → Set up billing (it can take a few minutes).")
             ok = False
     except Exception as e:

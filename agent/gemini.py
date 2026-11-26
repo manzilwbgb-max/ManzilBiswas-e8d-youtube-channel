@@ -141,6 +141,45 @@ class Overloaded(RuntimeError):
     """The model keeps answering 'busy' (5xx): better to switch to the next model than to wait."""
 
 
+def quota_summary(body_text):
+    """Google's quota details in short form: which limit was hit, its size, and when to retry."""
+    try:
+        details = (json.loads(body_text).get("error") or {}).get("details") or []
+    except Exception:
+        return ""
+    out = []
+    for d in details:
+        t = str(d.get("@type", ""))
+        if t.endswith("QuotaFailure"):
+            for v in d.get("violations") or []:
+                model = str((v.get("quotaDimensions") or {}).get("model", ""))
+                out.append(f"{v.get('quotaId') or v.get('quotaMetric') or 'quota'}={v.get('quotaValue', '?')}"
+                           + (f" ({model})" if model else ""))
+        elif t.endswith("RetryInfo") and d.get("retryDelay"):
+            out.append(f"retry in {d['retryDelay']}")
+    return "; ".join(out[:4])
+
+
+def quota_verdict(err):
+    """Plain words for a Gemini quota or billing refusal ('' when it isn't one)."""
+    s = str(err)
+    low = s.lower()
+    if "freetier" in low or "free_tier" in low or "free tier" in low:
+        if re.search(r"FreeTier=0\b", s):
+            return "this key's project gets no free quota for that model, so billing is needed"
+        if "PerDay" in s:
+            return ("today's free allowance is used up (it refills at about 1:30 pm India time); "
+                    "billing removes this limit")
+        if "PerMinute" in s:
+            return "too many free-tier requests this minute; it clears within a minute"
+        return "a free-tier limit was hit; billing removes it"
+    if any(w in low for w in ("prepay", "balance", "depleted")):
+        return "the billing account has no prepaid balance left: add credit at aistudio.google.com/billing"
+    if "billing" in low or "quota" in low:
+        return "Google refused for quota or billing reasons (billing not active, or a limit was reached)"
+    return ""
+
+
 def post(model, method, body, limiter, timeout=180, tries=6):
     url = f"{API}/models/{model}:{method}"
     delay, err, busy = 5.0, "unknown error", 0
@@ -156,7 +195,8 @@ def post(model, method, body, limiter, timeout=180, tries=6):
         if r is not None:
             if r.status_code == 200:
                 return r.json()
-            err = f"{r.status_code}: {r.text[:400]}"
+            qs = quota_summary(r.text) if r.status_code == 429 else ""
+            err = f"{r.status_code}: " + (f"[{qs}] " if qs else "") + r.text[:300]
             low = r.text.lower()
             if r.status_code in (400, 401, 403, 404):
                 raise Fatal(err)
