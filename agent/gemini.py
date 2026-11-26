@@ -45,6 +45,9 @@ IMAGE_LIMIT = Limiter(float(os.environ.get("IMAGE_RPM", "8")))
 TTS_LIMIT = Limiter(float(os.environ.get("TTS_RPM", "3")))
 _models = {}
 _ranked = {}
+_all = {}
+_banned = set()
+_rounds = {}
 
 
 def _version(n):
@@ -99,7 +102,8 @@ def models():
         want = os.environ.get(env, "").strip()
         if want and want in names:
             order = [want] + [n for n in order if n != want]
-        _ranked[kind] = order[:4]
+        _ranked[kind] = order[:6]
+        _all[kind] = list(order[:6])
         return order[0] if order else None
 
     _models.update(text=ranked("text", "TEXT_MODEL", text_score), image=ranked("image", "IMAGE_MODEL", image_score),
@@ -108,14 +112,27 @@ def models():
     return _models
 
 
-def _fallback(kind, failed, err):
-    """A model refused (no free tier, retired...): move to the next best one. Returns False when none is left."""
+def _fallback(kind, failed, err, busy=False):
+    """Move to the next best model. A refused model is dropped for good; when every model is only busy
+    (high demand), wait a little and go round again (up to 3 rounds). Returns False when nothing is left."""
+    if not busy:
+        _banned.add(failed)
     order = [n for n in _ranked.get(kind, []) if n != failed]
     _ranked[kind] = order
     if order:
-        log(f"Gemini {kind} model {failed} refused ({str(err)[:120]}); switching to {order[0]}")
+        log(f"Gemini {kind} model {failed} {'busy' if busy else 'refused'} ({str(err)[:120]}); switching to {order[0]}")
         _models[kind] = order[0]
         return True
+    if busy and _rounds.get(kind, 0) < 3:
+        _rounds[kind] = _rounds.get(kind, 0) + 1
+        wait = 45 * _rounds[kind]
+        log(f"all Gemini {kind} models are busy right now; waiting {wait}s and trying again")
+        time.sleep(wait)
+        order = [n for n in _all.get(kind, []) if n not in _banned]
+        _ranked[kind] = order
+        if order:
+            _models[kind] = order[0]
+            return True
     return False
 
 
@@ -132,6 +149,9 @@ def post(model, method, body, limiter, timeout=180, tries=6):
             r = requests.post(url, json=body, headers={"x-goog-api-key": key()}, timeout=timeout)
         except requests.RequestException as e:
             r, err = None, str(e)
+            busy += 1
+            if busy >= 2:
+                raise Overloaded(err)
         if r is not None:
             if r.status_code == 200:
                 return r.json()
@@ -165,13 +185,13 @@ def text_json(prompt, temperature=0.8, max_tokens=32000):
             if not model:
                 raise Fatal("No Gemini text model is available for this key")
             try:
-                j = post(model, "generateContent", body, TEXT_LIMIT, timeout=300)
+                j = post(model, "generateContent", body, TEXT_LIMIT, timeout=150)
                 break
             except Fatal as e:
                 if "API key" in str(e) or not _fallback("text", model, e):
                     raise
             except Overloaded as e:
-                if not _fallback("text", model, e):
+                if not _fallback("text", model, e, busy=True):
                     raise
         txt = "".join(p.get("text", "") for c in j.get("candidates", [])
                       for p in (c.get("content") or {}).get("parts", []) if not p.get("thought"))
@@ -214,7 +234,7 @@ def image(prompt, aspect, out_path, w, h):
                     continue
                 raise
             except Overloaded as e:
-                if not _fallback("image", model, e):
+                if not _fallback("image", model, e, busy=True):
                     raise
                 return image(prompt, aspect, out_path, w, h)
             part = _inline(j, "image/")
@@ -249,7 +269,7 @@ def tts(text, voice, out_wav):
                 model = _models["tts"]
                 break
             except Overloaded as e:
-                if not _fallback("tts", model, e):
+                if not _fallback("tts", model, e, busy=True):
                     raise
                 model = _models["tts"]
                 break
