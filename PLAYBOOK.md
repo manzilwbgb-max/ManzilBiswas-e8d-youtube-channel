@@ -32,8 +32,12 @@ The Shorts are **cinematic AI video**, not slideshows: every shot is a real gene
 - **History movie (~15 min), Wednesday + Sunday** — cold open, 6 chapters, open loops; the key scenes (cold open and
   chapter openers) are real AI video, the rest high-quality pictures with camera moves. This is the watch-hours engine.
 
-Without Gemini billing the same scripts are rendered with pictures and camera moves, and the agent sends you the shot
-prompts so you can make the real-video version free inside YouTube's own apps (YouTube Create / Shorts).
+Every Short is planned for the best video engine available that day, and the agent makes it on its own:
+1. **Google's Gemini Omni** (paid key, within `MONTHLY_VIDEO_BUDGET`): 4–6 shots, best quality.
+2. **Free AI video** — the open LTX-2.3 model on Hugging Face's free GPUs (secret `HF_TOKEN`, a free account): about
+   3 clips of up to 8 s a day, so the writer plans 3 longer shots. Allowed for monetized channels (LTX-2 license: free
+   under $10M revenue a year).
+3. Pictures with camera moves, only when both are used up for the day.
 
 ## What AI video costs (Gemini API list price, Nov 2026)
 

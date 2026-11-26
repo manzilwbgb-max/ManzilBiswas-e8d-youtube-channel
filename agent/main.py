@@ -831,10 +831,19 @@ def check_free_video(probe=False):
         return False
     took = time.time() - t0
     try:
-        print(f"✅ Free AI video test clip made: {render.probe_duration(out):.1f}s, "
+        import subprocess
+        size = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height",
+                               "-of", "csv=s=x:p=0", out], capture_output=True, text=True).stdout.strip()
+        print(f"✅ Free AI video test clip made: {render.probe_duration(out):.1f}s, {size}, "
               f"{'with' if video.has_audio(out) else 'without'} sound, in {took:.0f}s")
-    except OSError:  # no ffmpeg on this runner
-        print(f"✅ Free AI video test clip made in {took:.0f}s ({os.path.getsize(out) // 1024} KB)")
+        sheet = os.path.join(tempfile.gettempdir(), "free-video-frames.jpg")
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", out, "-vf", "fps=0.75,scale=360:-2,tile=3x1", "-frames:v", "1",
+                        sheet], check=True)
+        if os.environ.get("GITHUB_TOKEN") and os.environ.get("GITHUB_REPOSITORY"):
+            store.keep("free-video-test", {"free-video-test.mp4": out, "frames.jpg": sheet}, "Free AI video test clip")
+            print("   (kept on GitHub as a draft release for review)")
+    except Exception as e:  # no ffmpeg here, or no permission to keep files: the clip itself still worked
+        print(f"✅ Free AI video test clip made in {took:.0f}s ({os.path.getsize(out) // 1024} KB) [{str(e)[:80]}]")
     if has_telegram():
         try:
             telegram.send_video(out, "🧪 <b>Free AI video test</b> (LTX-2.3 on Hugging Face's free GPUs). This is the engine "

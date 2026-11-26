@@ -8,7 +8,7 @@ on:
         type: boolean
         default: false
 permissions:
-  contents: read
+  contents: write  # only to keep the optional free-video test clip as a draft release
 jobs:
   check:
     runs-on: ubuntu-latest

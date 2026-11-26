@@ -5,7 +5,7 @@ already makes your daily Shorts and movies and sends each finished video to Tele
 and tags ready to copy — you upload it from the YouTube app and tap **✅ I uploaded it**.
 Do step 3 later (on a computer) and the agent uploads by itself after your tap.
 
-You'll create 6 secrets (7 with AI video) in this GitHub repo: **Settings → Secrets and variables → Actions → New repository secret**.
+You'll create 6 secrets (up to 8 with AI video) in this GitHub repo: **Settings → Secrets and variables → Actions → New repository secret**.
 Never paste these keys into a chat, an issue or a file.
 
 | Secret | What it is |
@@ -14,6 +14,7 @@ Never paste these keys into a chat, an issue or a file.
 | `TELEGRAM_CHAT_ID` | your own Telegram chat id (step 1) |
 | `GEMINI_API_KEY` | Gemini API key (step 2) |
 | `GEMINI_PAID_KEY` | optional second Gemini key with billing, for AI video (step 2) |
+| `HF_TOKEN` | free Hugging Face token for the free AI video engine (step 2) |
 | `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN` | permission to post on your channel (step 3) |
 
 A computer browser is easiest for step 3; the rest works from a phone.
@@ -45,6 +46,12 @@ The schedules are already switched on: until the secrets are in, each run just n
    and writing on days the free allowance (20 requests per model per day) runs out. AI video and pictures stay inside
    `MONTHLY_VIDEO_BUDGET` ($10 a month by default), spread evenly over the month. When a prepaid balance reaches $0,
    Google pauses every key on that billing account, so keep a few dollars in it. See PLAYBOOK.md for costs.
+
+3. **Free AI video (recommended, free):** sign up at https://huggingface.co/join and verify your email →
+   Settings → Access Tokens → **Create new token** (type **Read**) → save it as the secret `HF_TOKEN`.
+   The agent then makes about 3 real AI video clips a day on Hugging Face's free GPUs (open LTX-2.3 model, with
+   sound) — enough for one fully AI Short every day at no cost. Run **Check setup** with *test_video* ticked to get a
+   sample clip in Telegram.
 
 ## 3. YouTube permission (15 min, computer recommended)
 
@@ -98,6 +105,8 @@ From then on everything runs on its own (times in IST):
 | `MOVIE_PICTURES` | same, for movies only (set `free` to keep costs low) | `PICTURES` |
 | `SHORTS_AI_PICTURES_MAX` / `MOVIE_AI_PICTURES_MAX` | most paid AI pictures per video (0 = no limit); the rest are free | `0` / `30` |
 | `CINEMATIC` | `auto` = Shorts are real AI video shots when billing allows; `off` = pictures with camera moves | `auto` |
+| `FREE_VIDEO` | `auto` = use the free AI video engine (Hugging Face); `off` = never | `auto` |
+| `FREE_VIDEO_SPACE` | which Hugging Face Space runs the free engine | `Lightricks/LTX-2-3` |
 | `CINE_FORMATS` | Short formats to rotate: `pov`, `trailer`, `timetraveler` | `pov,trailer` |
 | `SHORT_VIDEO_BUDGET` / `LOOP_VIDEO_BUDGET` / `MOVIE_VIDEO_BUDGET` | most dollars of AI video per video (0 = none) | `3` / `1` / `3` |
 | `MONTHLY_VIDEO_BUDGET` | most dollars of AI video per calendar month; keep it below your prepaid Gemini balance + plan credit | `10` |

@@ -43,7 +43,7 @@ the title, description and tags ready to copy, you upload it from the YouTube ap
 | Brain: topics, scripts, fact-check | Gemini free tier | same, higher limits |
 | Voice | Gemini voices while the free quota lasts, then a free offline voice (Piper) | Gemini voices |
 | Pictures | free AI pictures (Pollinations) + real public-domain archive photos (Wikimedia Commons) | Gemini AI pictures first, archive photos for real events |
-| Video | pictures with cinematic camera moves, plus shot prompts you can turn into real AI video free in YouTube's own apps | every Short shot is real AI video with natural sound (Gemini Omni); movies get AI video for their key scenes |
+| Video | real AI video with sound from an open model (LTX-2.3) on Hugging Face's free GPUs: about 3 clips a day, so one fully AI Short daily; pictures with camera moves after that | every Short shot is real AI video with natural sound (Gemini Omni); movies get AI video for their key scenes |
 
 The agent switches automatically: if billing is off or a quota runs out mid-video, it falls back
 to the free source and keeps one voice for the whole video. Change the defaults with repository
