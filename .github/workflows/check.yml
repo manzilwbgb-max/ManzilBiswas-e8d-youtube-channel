@@ -23,6 +23,7 @@ jobs:
           cache: pip
       - name: Install tools
         run: |
+          if [ "${{ inputs.test_video }}" = "true" ]; then sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null; fi
           pip install -q -r requirements.txt
           pip install -q piper-tts || echo "free voice engine not installed"
       - name: Check
@@ -43,3 +44,11 @@ jobs:
           TTS_MODEL: ${{ vars.TTS_MODEL }}
           IMAGE_MODEL: ${{ vars.IMAGE_MODEL }}
         run: python -m agent.main check $TEST_VIDEO
+      - name: Keep the test clip
+        if: ${{ always() && inputs.test_video }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: free-video-test
+          path: /tmp/free-video-test.mp4
+          if-no-files-found: ignore
+          retention-days: 3

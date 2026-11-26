@@ -121,6 +121,16 @@ def fit(lines, limit=1000):
 
 # ------------------------------------------------------------------ make
 
+def video_engine(kind, budget):
+    """Google's video model when this Short's budget covers it (best quality), else the free engine, else pictures."""
+    omni = video.available() and budget > 0
+    if omni and budget >= video.price(22 if kind == "story" else 8) and not (freevideo.available() and video.known_dead()):
+        return "omni"
+    if freevideo.available():
+        return "free"
+    return "omni" if omni else "pictures"
+
+
 def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
     p = plan()
     os.environ.setdefault("TTS_STYLE", p["channel"].get("voice_style", ""))
@@ -135,9 +145,11 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
     facts = strategist.research(idea, kind)
     cine = strategist.cinematic_mode() and kind in ("story", "loop")
     budget = video.start(kind)
+    engine = video_engine(kind, budget) if cine else "pictures"
     if cine:
-        script = strategist.write_cinematic(kind, idea, facts, recent)
+        script = strategist.write_cinematic(kind, idea, facts, recent, engine=engine)
         spec = strategist.cine_spec(kind, script, idea, p, pictures)
+        spec["video_engine"] = engine
     else:
         script = strategist.write(kind, idea, facts, recent, trends)
         spec = strategist.spec(kind, script, idea, p, pictures, motion)
@@ -157,7 +169,8 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
     if kind == "movie" and not 600 <= dur <= 1200:
         warn.append(f"the movie runs {dur / 60:.1f} minutes (aim 13-16)")
     fc = script.get("fact_check", {})
-    srcs = {"video": "AI video", "gemini": "Gemini picture", "free_ai": "free AI picture", "archive": "archive photo"}
+    srcs = {"video": "AI video", "free_video": "free AI video", "gemini": "Gemini picture", "free_ai": "free AI picture",
+            "archive": "archive photo"}
     pics = ", ".join(f"{v} {srcs.get(k, k)}" for k, v in out.get("sources", {}).items())
     if usd:
         pics += f" · AI video {out.get('video_seconds', 0):.0f}s ≈ ${usd:.2f}"
@@ -198,10 +211,6 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
             if out.get("thumbnail"):
                 telegram.send_photo(out["thumbnail"], "Thumbnail")
         return rec
-    if cine and not out.get("sources", {}).get("video") and has_telegram() and not DRY:
-        cards = [f"{i + 1}. {telegram.esc(sh['visual'][:300])}" for i, sh in enumerate(script["shots"])]
-        tell(fit(["🎬 <b>Want this one as real AI video for free?</b> YouTube's own apps (YouTube Create, Shorts) include "
-                  "Google's video model. Paste these shot prompts there, one per clip:", ""] + cards, 4000))
     files = {"video.mp4": out["video"]}
     if out.get("thumbnail"):
         files["thumbnail.jpg"] = out["thumbnail"]
@@ -820,8 +829,12 @@ def check_free_video(probe=False):
     except Exception as e:
         print("❌ Free AI video test clip failed:", str(e)[:300])
         return False
-    print(f"✅ Free AI video test clip made: {render.probe_duration(out):.1f}s, "
-          f"{'with' if video.has_audio(out) else 'without'} sound, in {time.time() - t0:.0f}s")
+    took = time.time() - t0
+    try:
+        print(f"✅ Free AI video test clip made: {render.probe_duration(out):.1f}s, "
+              f"{'with' if video.has_audio(out) else 'without'} sound, in {took:.0f}s")
+    except OSError:  # no ffmpeg on this runner
+        print(f"✅ Free AI video test clip made in {took:.0f}s ({os.path.getsize(out) // 1024} KB)")
     if has_telegram():
         try:
             telegram.send_video(out, "🧪 <b>Free AI video test</b> (LTX-2.3 on Hugging Face's free GPUs). This is the engine "

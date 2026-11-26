@@ -9,7 +9,7 @@ import threading
 import time
 
 from . import gemini
-from .util import http, log, now, today
+from .util import http, load, log, now, save, today
 
 # USD per second, Gemini API list price (Nov 2026). Omni 1.2 went GA on 5 Nov 2026 at a lower price; from 3 Dec 2026
 # Google routes 1.1 requests to 1.2 anyway.
@@ -204,6 +204,8 @@ def clip(prompt, aspect, seconds, out_path, refs=None, first_frame=None):
                         f.write(base64.b64decode(v["data"]))
                 else:
                     _download(v["uri"], out_path)
+                if load("video_status.json", {}).get("dead"):
+                    save("video_status.json", {})  # it works again (billing switched on)
                 actual = price(seconds, model)
                 with _lock:
                     _state["spent"] -= cost - actual  # keep only what this model really costs
@@ -223,8 +225,20 @@ def clip(prompt, aspect, seconds, out_path, refs=None, first_frame=None):
     if any(w in low for w in ("billing", "free tier", "not available", "permission", "api key", "limit: 0", "quota")) \
             or last[:3] in ("401", "403", "404"):
         _state["dead"] = last
+        save("video_status.json", {"dead": last[:200], "at": now().isoformat()})
         raise gemini.Fatal("AI video unavailable: " + last)
     raise RuntimeError("AI video failed: " + last)
+
+
+def known_dead():
+    """True when Google's video model refused for billing reasons in the last 20 hours (remembered across runs, so the
+    next Short is planned for the free engine straight away)."""
+    st = load("video_status.json", {})
+    try:
+        import datetime as dt
+        return bool(st.get("dead")) and (now() - dt.datetime.fromisoformat(st["at"])).total_seconds() < 20 * 3600
+    except Exception:
+        return False
 
 
 def charge(usd, force=False):

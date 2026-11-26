@@ -50,6 +50,9 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_PAID_KEY: ${{ secrets.GEMINI_PAID_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          FREE_VIDEO: ${{ vars.FREE_VIDEO || 'auto' }}
+          FREE_VIDEO_SPACE: ${{ vars.FREE_VIDEO_SPACE || 'Lightricks/LTX-2-3' }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}

@@ -65,6 +65,8 @@ CINE_FORMATS = {
                     "excited lines; the same person in every shot",
 }
 CINE_LENGTH = {"story": (45, 80, 4, 6, 20, 32), "loop": (12, 24, 1, 2, 6, 10)}  # words, shots, seconds
+# the free video engine makes about 3 clips a day of up to 8 s: fewer, longer shots
+FREE_LENGTH = {"story": (40, 58, 3, 3, 18, 24), "loop": (12, 20, 1, 1, 6, 8)}
 
 
 def cinematic_mode():
@@ -473,9 +475,11 @@ Return JSON: {{"scenes": [{{"narration": "...", "image_prompt": "16:9 cinematic 
     return script
 
 
-def write_cinematic(kind, idea, facts, recent, host_look=""):
-    """A shot list for real AI video: each shot is a camera direction with natural sound, plus the voiceover."""
-    wlo, whi, slo, shi, tlo, thi = CINE_LENGTH[kind]
+def write_cinematic(kind, idea, facts, recent, host_look="", engine="omni"):
+    """A shot list for real AI video: each shot is a camera direction with natural sound, plus the voiceover.
+    engine "free" plans fewer, longer shots for the free video engine (about 3 clips of up to 8 s a day)."""
+    wlo, whi, slo, shi, tlo, thi = (FREE_LENGTH if engine == "free" else CINE_LENGTH)[kind]
+    shot_len = "6-8" if engine == "free" else "3-10"
     fmt = idea["format"] if kind == "story" else "loop"
     desc = CINE_FORMATS.get(fmt, "one or two breathtaking shots that show the fact itself, with a voiceover that loops")
     talk = fmt == "timetraveler"
@@ -485,7 +489,7 @@ def write_cinematic(kind, idea, facts, recent, host_look=""):
 
 TASK: cine_{kind}
 You are also the director. Write a cinematic AI-video YouTube Short, shot by shot, for a video model that generates
-photorealistic 3-10 second shots with natural sound.
+photorealistic {shot_len} second shots with natural sound.
 TOPIC: {idea['topic']}
 ANGLE: {idea.get('angle') or 'the most gripping true angle'}
 SERIES: {idea['series']}

@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
-from . import gemini, sources, video
+from . import freevideo, gemini, sources, video
 from .voice import speak_all
 from .util import log
 
@@ -737,22 +737,34 @@ def make_cinematic(spec, work):
     refs = [spec["host"]] if spec.get("host") and os.path.exists(spec["host"]) else None
     patterns = KB_PATTERNS_TALL if h > w else KB_PATTERNS
 
+    # which video engine to try first: Google's (paid, best) or the free one; each falls back to the other
+    order = {"omni": ["omni", "free"], "free": ["free", "omni"], "pictures": []}.get(spec.get("video_engine", "omni"),
+                                                                                     ["omni", "free"])
+
     def make_shot(i):
         s, out = shots[i], os.path.join(d, f"shot_{i:02d}.mp4")
         sound = (f" The vlogger says: \"{s['dialogue']}\"" if s.get("dialogue") else
                  " Natural ambient sound only, no dialogue, no music.")
-        try:
-            raw = os.path.join(d, f"raw_{i:02d}.mp4")
-            video.clip(f"{s['visual']}. Style: {spec['style']}.{sound}", aspect, max(target[i], 3), raw, refs=refs)
-            fit_clip(raw, out, target[i], w, h)
-            kind_of[i] = "video"
-            return
-        except gemini.Fatal as e:
-            msg = f"AI video unavailable ({str(e)[:140]}); used pictures with camera moves"
-            if msg not in warnings:
-                warnings.append(msg)
-        except Exception as e:
-            log(f"shot {i + 1}: AI video failed: {str(e)[:200]}")
+        prompt, raw = f"{s['visual']}. Style: {spec['style']}.{sound}", os.path.join(d, f"raw_{i:02d}.mp4")
+        for eng in order:
+            try:
+                if eng == "omni":
+                    video.clip(prompt, aspect, max(target[i], 3), raw, refs=refs)
+                else:
+                    freevideo.clip(prompt, aspect, max(target[i], 2), raw)
+                fit_clip(raw, out, target[i], w, h)
+                kind_of[i] = "video" if eng == "omni" else "free_video"
+                return
+            except gemini.Fatal as e:
+                msg = f"AI video unavailable ({str(e)[:140]})"
+                if msg not in warnings:
+                    warnings.append(msg)
+            except Exception as e:
+                log(f"shot {i + 1}: {'free ' if eng == 'free' else ''}AI video failed: {str(e)[:200]}")
+                if eng == "free" and not freevideo.available():
+                    msg = "free AI video is used up for today"
+                    if msg not in warnings:
+                        warnings.append(msg)
         img = os.path.join(d, f"img_{i:02d}.jpg")
         src = pics.make(i, {"image_prompt": s["visual"], "archive_query": s.get("archive_query") or spec.get("topic", "")}, img)
         if not src:
@@ -846,6 +858,9 @@ def make_cinematic(spec, work):
         if k:
             used[k] = used.get(k, 0) + 1
     vsec = round(sum(max(target[i], 3) for i in range(n) if kind_of[i] == "video"), 1)
+    if order and any(k not in ("video", "free_video") for k in kind_of if k):
+        warnings.append(f"{sum(1 for k in kind_of if k and k not in ('video', 'free_video'))} shot(s) used pictures "
+                        "with camera moves (no AI video left for them)")
     return {"video": final, "preview": preview, "duration": round(probe_duration(final), 2), "warnings": warnings,
             "chapters": [], "sources": used, "voice_engine": engine, "video_seconds": vsec,
-            "motion_clips": used.get("video", 0)}
+            "motion_clips": used.get("video", 0) + used.get("free_video", 0)}
