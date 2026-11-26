@@ -8,6 +8,7 @@ called through gradio_client like any other Hugging Face Space.
 Every failure is reported so the caller can fall back to Google's video model or to pictures."""
 import os
 import random
+import re
 import shutil
 import threading
 import time
@@ -46,6 +47,21 @@ def used():
 
 def why_off():
     return _state["dead"] or ("switched off (FREE_VIDEO=off)" if not wanted() else "gradio_client is not installed")
+
+
+_NOUNS = r"(?:text|captions?|subtitles?|logos?|watermarks?|letters|words|dialogue|music|talking|speech)"
+_NEGATED = re.compile(rf",?\s*\b(?:no|without)\s+(?:[\w-]+\s+)?{_NOUNS}\b(?:\s*(?:,|or|and)\s*(?:no\s+)?(?:[\w-]+\s+)?{_NOUNS}\b)*",
+                      re.I)
+
+
+def positive(prompt):
+    """Open video models tend to draw whatever a prompt names, even after "no" ("no text, no logos" gives fake logos
+    and junk lettering), so the free engine only gets the positive description."""
+    p = _NEGATED.sub("", prompt)
+    p = re.sub(r"\bin the (?:picture|frame)\b\.?", "", p, flags=re.I)
+    p = re.sub(r"\s+([.,;:])", r"\1", re.sub(r"\s{2,}", " ", p))
+    p = re.sub(r"([.,;:])(?:\s*[.,;:])+", r"\1", p)
+    return p.strip(" ,;")
 
 
 def _token():
@@ -142,13 +158,13 @@ def clip(prompt, aspect, seconds, out_path, first_frame=None):
         raise RuntimeError("free AI video is not available: " + why_off())
     width, height = SIZES.get(aspect, SIZES["9:16"])
     secs = round(min(max(float(seconds), 2.0), max_seconds()), 1)
-    text = (f"{prompt}. Photorealistic cinematic footage, {'vertical portrait framing' if aspect == '9:16' else 'wide framing'}"
-            ". No on-screen text, captions, logos or watermarks.")
+    text = positive(prompt).rstrip(".") + ". Photorealistic cinematic film footage, natural light and real-world detail."
     with _lock:
         if _state["dead"]:
             raise RuntimeError("free AI video is used up for today: " + _state["dead"])
         connect()
-        args = {"prompt": text, "duration": secs, "enhance_prompt": False, "seed": random.randint(1, 2 ** 31 - 1),
+        enhance = os.environ.get("FREE_VIDEO_ENHANCE", "1").lower() not in ("0", "off", "no", "false")
+        args = {"prompt": text, "duration": secs, "enhance_prompt": enhance, "seed": random.randint(1, 2 ** 31 - 1),
                 "randomize_seed": False, "height": height, "width": width}
         if first_frame:
             from gradio_client import handle_file

@@ -823,9 +823,11 @@ def check_free_video(probe=False):
     import tempfile
     out, t0 = os.path.join(tempfile.gettempdir(), "free-video-test.mp4"), time.time()
     try:
-        freevideo.clip("POV: you stand on the deck of the Titanic at night, icy breath in the air, stars overhead, crew "
-                       "lowering a lifeboat beside you, handheld camera. Natural ambient sound only, no dialogue, no music",
-                       "9:16", 4, out)
+        freevideo.clip("First-person POV, handheld, looking over the railing of the Titanic's boat deck at night, April 1912: "
+                       "my gloved hands grip the cold wooden rail while crew members in dark 1912 White Star Line uniforms "
+                       "lower a crowded wooden lifeboat on creaking ropes toward the black, glassy sea; stars blaze overhead "
+                       "and my breath fogs in the freezing air. Sounds: creaking ropes, distant shouting, lapping water",
+                       "9:16", 5, out)
     except Exception as e:
         print("❌ Free AI video test clip failed:", str(e)[:300])
         return False
