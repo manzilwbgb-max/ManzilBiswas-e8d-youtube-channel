@@ -652,6 +652,24 @@ def check():
     return 0 if ok else 1
 
 
+NEEDS = {"make": ["GEMINI_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"],
+         "approvals": ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN"],
+         "report": ["GEMINI_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "YT_CLIENT_ID", "YT_CLIENT_SECRET",
+                    "YT_REFRESH_TOKEN"]}
+
+
+def setup_missing(cmd):
+    """Scheduled runs before setup is finished stop politely instead of failing every hour."""
+    need = NEEDS.get(cmd, [])
+    if cmd == "make" and DRY:
+        need = ["GEMINI_API_KEY"]
+    gone = [n for n in need if not os.environ.get(n, "").strip()]
+    if gone:
+        print(f"::warning::Setup not finished - add these repository secrets: {', '.join(gone)} (see SETUP.md). "
+              "Then run 'Check setup'.")
+    return gone
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="agent", description="History with Me YouTube agent")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -663,6 +681,8 @@ def main(argv=None):
     for name in ("approvals", "report", "scout", "check"):
         sub.add_parser(name)
     a = ap.parse_args(argv)
+    if setup_missing(a.cmd):
+        return 0
     if a.cmd == "make":
         return make(a.kind, a.topic.strip() or None, a.pictures or None, a.motion)
     return {"approvals": approvals, "report": report, "scout": scout_cmd, "check": check}[a.cmd]()

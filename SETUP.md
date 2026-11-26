@@ -11,6 +11,7 @@ Never paste these keys into a chat, an issue or a file.
 | `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN` | permission to post on your channel (step 3) |
 
 A computer browser is easiest for step 3; the rest works from a phone.
+The schedules are already switched on: until the secrets are in, each run just notes "Setup not finished" and stops.
 
 ## 1. Telegram bot (5 min)
 
