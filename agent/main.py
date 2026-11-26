@@ -597,6 +597,60 @@ def scout_cmd():
     return 0
 
 
+DEMO = {
+    "title": "The First Airplane Flight Lasted 12 Seconds",
+    "hook": "12 SECONDS",
+    "topic": "Wright Flyer first flight 1903",
+    "series": "Timeline Twists",
+    "wiki": ["Wright Flyer"],
+    "scenes": [
+        {"narration": "The first airplane flight lasted just twelve seconds.", "visual": "ai", "archive_query": "Wright Flyer",
+         "image_prompt": "close-up of the 1903 Wright Flyer's wooden propeller and canvas wing on a windswept sand dune, grey December sky"},
+        {"narration": "December 1903. An icy wind sweeps the dunes near Kitty Hawk, North Carolina.", "visual": "ai",
+         "archive_query": "Kill Devil Hills 1903",
+         "image_prompt": "wide shot of desolate sand dunes at Kill Devil Hills, North Carolina in 1903, a wooden shed and a long wooden launch rail, cold wind"},
+        {"narration": "Orville Wright lies flat on the wing as his brother Wilbur runs beside it.", "visual": "ai",
+         "archive_query": "Wright brothers 1903",
+         "image_prompt": "a man in a dark 1900s suit lying flat on the lower wing of the Wright Flyer biplane, a second man in a cap running beside the wingtip"},
+        {"narration": "The Flyer lifts off and covers about 120 feet, less than a jumbo jet's wingspan.", "visual": "archive",
+         "archive_query": "Wright Flyer first flight 1903",
+         "image_prompt": "the Wright Flyer biplane lifting off its launch rail a few feet above the sand"},
+        {"narration": "A lifesaver named John Daniels pressed the shutter and caught the moment.", "visual": "ai",
+         "archive_query": "glass plate camera 1900",
+         "image_prompt": "a man in a 1900s lifesaving station uniform behind a large wooden box camera on a tripod on a sand dune"},
+        {"narration": "By the fourth flight that day, they stayed up fifty-nine seconds.", "visual": "ai",
+         "archive_query": "Wright Flyer 1903 flight",
+         "image_prompt": "the Wright Flyer biplane soaring low over the dunes, its long shadow on the sand, late afternoon light"},
+        {"narration": "Sixty-six years later, a piece of that Flyer flew to the Moon.", "visual": "archive",
+         "archive_query": "Apollo 11 Lunar Module Eagle",
+         "image_prompt": "the Apollo 11 lunar module on the grey surface of the Moon, Earth in the black sky"},
+    ],
+}
+
+
+def demo():
+    """A real Short made only with the free services (script written in advance, so no keys are needed).
+    It proves the free picture, voice and editing line on GitHub's servers."""
+    import json
+    p = plan()
+    idea = {"id": "demo", "topic": DEMO["topic"], "series": DEMO["series"], "wiki": DEMO["wiki"], "format": "one-number"}
+    facts = strategist.research(idea, "story")
+    script = {"title": DEMO["title"], "hook_text": DEMO["hook"], "scenes": [dict(x) for x in DEMO["scenes"]]}
+    spec = strategist.spec("story", script, idea, p, pictures="free", motion=0)
+    spec["voice_engine"] = "free"
+    rid = f"{stamp()}-demo"
+    out = render.make(spec, os.path.join(WORK, rid))
+    report = {"duration": out["duration"], "pictures": out["sources"], "voice": out.get("voice_engine"),
+              "warnings": out["warnings"], "wikipedia": facts["sources"]}
+    print("DEMO RESULT " + json.dumps(report), flush=True)
+    if has_telegram():
+        telegram.send_video(out["video"], f"🧪 <b>Demo Short</b> (free pictures + free voice): {telegram.esc(DEMO['title'])}")
+    if os.environ.get("GITHUB_TOKEN") and os.environ.get("GITHUB_REPOSITORY"):
+        rel = store.keep(rid, {"demo-short.mp4": out["video"]}, "Demo Short made with the free services only")
+        print("DEMO STORED " + json.dumps(rel), flush=True)
+    return 0
+
+
 def check():
     ok = True
     print("Checking the History with Me agent...\n")
@@ -678,14 +732,14 @@ def main(argv=None):
     mk.add_argument("--topic", default="")
     mk.add_argument("--pictures", default="", choices=["", "auto", "gemini", "free", "archive"])
     mk.add_argument("--motion", type=int, default=None)
-    for name in ("approvals", "report", "scout", "check"):
+    for name in ("approvals", "report", "scout", "check", "demo"):
         sub.add_parser(name)
     a = ap.parse_args(argv)
     if setup_missing(a.cmd):
         return 0
     if a.cmd == "make":
         return make(a.kind, a.topic.strip() or None, a.pictures or None, a.motion)
-    return {"approvals": approvals, "report": report, "scout": scout_cmd, "check": check}[a.cmd]()
+    return {"approvals": approvals, "report": report, "scout": scout_cmd, "check": check, "demo": demo}[a.cmd]()
 
 
 if __name__ == "__main__":
