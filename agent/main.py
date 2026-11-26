@@ -764,8 +764,11 @@ def check():
                 if c.get("id"):
                     seen[c["id"]] = c.get("first_name") or c.get("title") or ""
             for cid, name in seen.items():
-                telegram.call("sendMessage", chat_id=cid, text=f"Your chat id is {cid}. Save it as the GitHub secret TELEGRAM_CHAT_ID.")
-                print(f"ℹ️ Telegram chat found: {cid} ({name}) - save it as TELEGRAM_CHAT_ID")
+                telegram.call("sendMessage", chat_id=cid, text=(
+                    f"Your chat id is {cid}\n\nSave this number in GitHub: your repository → Settings → Secrets and "
+                    "variables → Actions → New repository secret. Name: TELEGRAM_CHAT_ID, Secret: the number above."))
+                print("ℹ️ Found your Telegram chat: I sent your chat id to you in Telegram (not shown here because "
+                      "these logs are public). Save it as the secret TELEGRAM_CHAT_ID.")
             if not seen:
                 print("ℹ️ Send any message to your bot on Telegram, then run Check setup again to get your chat id.")
         except Exception as e:
