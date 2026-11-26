@@ -183,7 +183,11 @@ def make_one(kind, topic=None, pictures=None, motion=None, trends=None):
            "fact_check": fc, "sources": facts.get("sources", []), "warnings": warn, "pictures": out.get("sources", {}),
            "video_usd": usd}
     if DRY:
-        log("DRY RUN - nothing stored or uploaded.", rec["title"], f"{dur:.1f}s", out["video"])
+        log("DRY RUN - nothing uploaded.", rec["title"], f"{dur:.1f}s", out["video"])
+        if os.environ.get("GITHUB_TOKEN") and os.environ.get("GITHUB_REPOSITORY"):
+            import json
+            kept = store.keep(f"{rid}-test", {"test-video.mp4": out["video"]}, f"TEST: {meta['title']}\n\n{caption}")
+            print("TEST STORED " + json.dumps(kept), flush=True)
         if has_telegram():
             telegram.send_video(out["preview"], "🧪 <b>TEST RUN</b> (not stored, not uploaded)\n" + caption)
             if out.get("thumbnail"):

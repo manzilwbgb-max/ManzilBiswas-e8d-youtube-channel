@@ -119,9 +119,13 @@ def _fallback(kind, failed, err):
     return False
 
 
+class Overloaded(RuntimeError):
+    """The model keeps answering 'busy' (5xx): better to switch to the next model than to wait."""
+
+
 def post(model, method, body, limiter, timeout=180, tries=6):
     url = f"{API}/models/{model}:{method}"
-    delay, err = 5.0, "unknown error"
+    delay, err, busy = 5.0, "unknown error", 0
     for _ in range(tries):
         limiter.wait()
         try:
@@ -137,6 +141,10 @@ def post(model, method, body, limiter, timeout=180, tries=6):
                 raise Fatal(err)
             if r.status_code == 429 and any(w in low for w in ("billing", "prepay", "credit", "free_tier", "free tier", "per day")):
                 raise Fatal("Gemini quota or billing limit: " + err)
+            if r.status_code >= 500:
+                busy += 1
+                if busy >= 2:
+                    raise Overloaded(err)
             ra = r.headers.get("Retry-After", "")
             if ra.isdigit():
                 delay = max(delay, float(ra))
@@ -161,6 +169,9 @@ def text_json(prompt, temperature=0.8, max_tokens=32000):
                 break
             except Fatal as e:
                 if "API key" in str(e) or not _fallback("text", model, e):
+                    raise
+            except Overloaded as e:
+                if not _fallback("text", model, e):
                     raise
         txt = "".join(p.get("text", "") for c in j.get("candidates", [])
                       for p in (c.get("content") or {}).get("parts", []) if not p.get("thought"))
@@ -202,6 +213,10 @@ def image(prompt, aspect, out_path, w, h):
                 if str(e).startswith("400") and "billing" not in str(e).lower():
                     continue
                 raise
+            except Overloaded as e:
+                if not _fallback("image", model, e):
+                    raise
+                return image(prompt, aspect, out_path, w, h)
             part = _inline(j, "image/")
             data = part["data"] if part else None
             break
@@ -229,6 +244,11 @@ def tts(text, voice, out_wav):
             except Fatal as e:
                 if v != "Charon" and str(e).startswith("400"):
                     continue
+                if not _fallback("tts", model, e):
+                    raise
+                model = _models["tts"]
+                break
+            except Overloaded as e:
                 if not _fallback("tts", model, e):
                     raise
                 model = _models["tts"]
