@@ -1,5 +1,5 @@
 """Real AI video shots with Google's video model (Gemini Omni Flash, Gemini API "interactions").
-Paid only (about $0.10 per second at 720p). Every failure is reported so the caller can fall back to pictures."""
+Paid only (Omni 1.2: about $0.07 per second at 720p). Every failure is reported so the caller can fall back to pictures."""
 import base64
 import calendar
 import json
@@ -11,8 +11,13 @@ import time
 from . import gemini
 from .util import http, log, now, today
 
-PRICE = {"360p": 0.034, "720p": 0.10, "1080p": 0.15, "4k": 0.30}  # USD per second (Gemini API list price)
-MODELS = [m for m in os.environ.get("VIDEO_MODEL", "gemini-omni-1.1-flash,gemini-omni-flash").split(",") if m.strip()]
+# USD per second, Gemini API list price (Nov 2026). Omni 1.2 went GA on 5 Nov 2026 at a lower price; from 3 Dec 2026
+# Google routes 1.1 requests to 1.2 anyway.
+PRICES = {"gemini-omni-1.2-flash": {"360p": 0.023, "720p": 0.07, "1080p": 0.104, "4k": 0.209},
+          "default": {"360p": 0.034, "720p": 0.10, "1080p": 0.15, "4k": 0.30}}
+PRICE = PRICES["default"]
+MODELS = [m.strip() for m in os.environ.get("VIDEO_MODEL", "gemini-omni-1.2-flash,gemini-omni-1.1-flash").split(",")
+          if m.strip()]
 RES = os.environ.get("VIDEO_RESOLUTION", "720p")
 _lock = threading.Lock()
 _state = {"dead": None, "spent": 0.0, "budget": 0.0}
@@ -73,8 +78,10 @@ def cap_note():
     return f"Only ${_state['budget']:.2f} of this month's ${cap:.0f} AI video budget was left for this video."
 
 
-def price(seconds):
-    return round(seconds * float(os.environ.get("VIDEO_PRICE_PER_SEC", PRICE.get(RES, 0.10))), 2)
+def price(seconds, model=None):
+    """Cost of a clip on `model` (default: the first model the agent tries)."""
+    table = PRICES.get(model or (MODELS[0] if MODELS else ""), PRICES["default"])
+    return round(seconds * float(os.environ.get("VIDEO_PRICE_PER_SEC", table.get(RES, 0.10))), 2)
 
 
 def spent_today():
@@ -132,28 +139,45 @@ def _download(uri, out):
         f.write(r.content)
 
 
+def _bodies(body):
+    """The request, then simpler versions of it: if Google rejects a field as invalid (400), drop the optional
+    extras one by one (length, task) before giving up on that model."""
+    yield body
+    b = json.loads(json.dumps(body))
+    if b["response_format"].pop("duration", None):
+        yield b
+    b = json.loads(json.dumps(b))
+    if b.pop("generation_config", None):
+        yield b
+
+
 def clip(prompt, aspect, seconds, out_path, refs=None, first_frame=None):
     """One shot. refs: list of image paths for character/style consistency; first_frame: image to animate.
     Returns the raw clip path, or raises (gemini.Fatal when video can't be used at all this run)."""
     if not available():
         raise gemini.Fatal("AI video is off or unavailable")
-    seconds = int(min(max(round(seconds), 3), 10))
-    cost = price(seconds)
+    seconds = int(min(max(round(seconds), 3), 10))  # 3-10 s works on every Omni version and for first frames
+    cost = max(price(seconds, m) for m in MODELS) if MODELS else price(seconds)  # reserve the dearest; refund later
     with _lock:
         if _state["budget"] - _state["spent"] < cost - 1e-9:
             raise RuntimeError("this video's AI video budget is used up")
         _state["spent"] += cost  # reserve
-    parts = []
-    for i, p in enumerate((refs or [])[:7]):
+    parts, refs = [], (refs or [])[:6]
+    for p in refs:
         with open(p, "rb") as f:
             parts.append({"type": "image", "data": base64.b64encode(f.read()).decode(), "mime_type": "image/jpeg"})
     if first_frame:
         with open(first_frame, "rb") as f:
             parts.append({"type": "image", "data": base64.b64encode(f.read()).decode(), "mime_type": "image/jpeg"})
-    text = (f"{prompt}\nDuration: about {seconds} seconds. Aspect ratio {aspect}. "
+    text = (f"{prompt}\nDuration: about {seconds} seconds. Aspect ratio {aspect}"
+            f"{' (vertical, portrait)' if aspect == '9:16' else ''}. "
             "Photorealistic cinematic footage. No on-screen text, captions, logos or watermarks.")
+    # plain-language roles for the images (Omni 1.2 deprecates tags like <IMAGE_REF_0> and <FIRST_FRAME>)
     if refs:
-        text = " ".join(f"<IMAGE_REF_{i}>" for i in range(len(refs[:7]))) + " are references for the same character. " + text
+        text = (f"The first {len(refs)} image{'s are reference pictures' if len(refs) > 1 else ' is a reference picture'} "
+                "of the same character: keep the face, hair and clothes exactly the same. ") + text
+    if first_frame:
+        text = "Start the video exactly from the last image as its first frame, then bring it to life. " + text
     body = {"input": parts + [{"type": "text", "text": text}] if parts else text,
             "response_format": {"type": "video", "aspect_ratio": aspect, "resolution": RES, "duration": f"{seconds}s"}}
     if first_frame:
@@ -161,17 +185,15 @@ def clip(prompt, aspect, seconds, out_path, refs=None, first_frame=None):
     elif refs:
         body["generation_config"] = {"video_config": {"task": "reference_to_video"}}
     url = os.environ.get("GEMINI_API_BASE", "https://generativelanguage.googleapis.com/v1beta").rstrip("/") + "/interactions"
-    last = ""
+    last, r = "", None
     try:
         for model in MODELS:
-            b = dict(body, model=model.strip())
-            for attempt in range(2):
+            for b in _bodies(dict(body, model=model)):
                 r = http("POST", url, headers={"x-goog-api-key": gemini.key("video"), "Content-Type": "application/json"},
                          data=json.dumps(b), timeout=900, tries=3)
-                if r is not None and r.status_code == 400 and "duration" in r.text.lower() and "duration" in b["response_format"]:
-                    b = json.loads(json.dumps(b))
-                    b["response_format"].pop("duration")  # some versions take the length from the prompt only
-                    continue
+                if r is not None and r.status_code == 400 and "billing" not in r.text.lower():
+                    last = f"400: {r.text[:300]}"
+                    continue  # an invalid field: try a simpler request
                 break
             if r is not None and r.status_code == 200:
                 v = _find_video(r.json())
@@ -182,11 +204,14 @@ def clip(prompt, aspect, seconds, out_path, refs=None, first_frame=None):
                         f.write(base64.b64decode(v["data"]))
                 else:
                     _download(v["uri"], out_path)
-                log(f"AI video shot ready ({seconds}s, {model}, ≈${cost})")
+                actual = price(seconds, model)
+                with _lock:
+                    _state["spent"] -= cost - actual  # keep only what this model really costs
+                log(f"AI video shot ready ({seconds}s, {model}, ≈${actual})")
                 return out_path
             last = f"{getattr(r, 'status_code', 'no answer')}: {getattr(r, 'text', '')[:300]}"
-            if r is not None and r.status_code == 404:
-                continue  # try the next model name
+            if r is not None and r.status_code in (400, 404):
+                continue  # try the next model
             break
     except Exception:
         with _lock:

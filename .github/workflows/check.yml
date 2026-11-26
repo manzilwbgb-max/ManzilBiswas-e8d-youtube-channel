@@ -2,12 +2,17 @@ name: Check setup
 # Run this after adding the secrets: it tests Gemini, YouTube, Telegram and the free voice, and tells you what's missing.
 on:
   workflow_dispatch:
+    inputs:
+      test_video:
+        description: "Also make one free AI video test clip and send it to Telegram (uses one of today's free clips)"
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -30,7 +35,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GITHUB_TOKEN: ${{ github.token }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          FREE_VIDEO: ${{ vars.FREE_VIDEO || 'auto' }}
+          FREE_VIDEO_SPACE: ${{ vars.FREE_VIDEO_SPACE || 'Lightricks/LTX-2-3' }}
+          TEST_VIDEO: ${{ inputs.test_video && '--video' || '' }}
           TEXT_MODEL: ${{ vars.TEXT_MODEL }}
           TTS_MODEL: ${{ vars.TTS_MODEL }}
           IMAGE_MODEL: ${{ vars.IMAGE_MODEL }}
-        run: python -m agent.main check
+        run: python -m agent.main check $TEST_VIDEO

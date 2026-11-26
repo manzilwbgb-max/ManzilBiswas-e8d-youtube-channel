@@ -101,7 +101,7 @@ From then on everything runs on its own (times in IST):
 | `CINE_FORMATS` | Short formats to rotate: `pov`, `trailer`, `timetraveler` | `pov,trailer` |
 | `SHORT_VIDEO_BUDGET` / `LOOP_VIDEO_BUDGET` / `MOVIE_VIDEO_BUDGET` | most dollars of AI video per video (0 = none) | `3` / `1` / `3` |
 | `MONTHLY_VIDEO_BUDGET` | most dollars of AI video per calendar month; keep it below your prepaid Gemini balance + plan credit | `10` |
-| `VIDEO_RESOLUTION` | `720p` (≈ $0.10/s, upscaled to 1080p for free) or `1080p` (≈ $0.15/s) | `720p` |
+| `VIDEO_RESOLUTION` | `720p` (≈ $0.07/s on Omni 1.2, upscaled to 1080p for free) or `1080p` (≈ $0.10/s) | `720p` |
 | `MOVIE_MOTION` | how many key movie scenes become AI video | `4` |
 | `VOICE` | `auto`, `gemini`, `free` | `auto` |
 | `TEXT_MODEL`, `TTS_MODEL`, `IMAGE_MODEL` | pin a Gemini model; empty = newest Flash model the key can use | empty |

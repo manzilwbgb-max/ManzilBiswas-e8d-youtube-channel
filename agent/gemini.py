@@ -91,8 +91,9 @@ def models():
         meth = names[n]
         if "generateContent" not in meth or not n.startswith("gemini"):
             return None
-        if any(x in n for x in ("image", "tts", "embedding", "live", "audio", "vision", "aqa", "robotics", "computer")):
-            return None
+        if any(x in n for x in ("image", "tts", "embedding", "live", "audio", "vision", "aqa", "robotics", "computer",
+                                "omni", "veo")):
+            return None  # video and media models are not writers
         return 50 + 10 * ("flash" in n) - 4 * ("lite" in n) - 6 * ("pro" in n) - 2 * ("preview" in n or "exp" in n) + _version(n)
 
     def image_score(n):

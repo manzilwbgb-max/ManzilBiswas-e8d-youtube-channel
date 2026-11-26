@@ -37,7 +37,7 @@ prompts so you can make the real-video version free inside YouTube's own apps (Y
 
 ## What AI video costs (Gemini API list price, Nov 2026)
 
-About $0.10 per second at 720p (the agent upscales to 1080p for free). Default caps per video:
+About $0.07 per second at 720p on Gemini Omni 1.2 (the agent upscales to 1080p for free); a 25-second cinematic Short is about $1.75, so $10 a month buys five or six. Default caps per video:
 story Short $3 (≈ 30 s of video), loop $1, movie $3 (≈ 4 key scenes) — at most ≈ $4 a day plus ≈ $3 per movie,
 roughly $150 a month if every video used its full cap. On top of that, `MONTHLY_VIDEO_BUDGET` (default $10)
 caps the whole month: once it is reached, videos use pictures until the 1st. Keep it below your prepaid Gemini

@@ -11,11 +11,12 @@ import datetime as dt
 import os
 import shutil
 import sys
+import time
 import traceback
 
 import requests
 
-from . import gemini, render, scout, store, strategist, telegram, video, youtube
+from . import freevideo, gemini, render, scout, store, strategist, telegram, video, youtube
 from .util import DRY, WORK, get_item, items, load, log, now, put, save, slug, stamp, today
 
 GOAL_DATE = dt.date(2027, 2, 1)
@@ -791,7 +792,46 @@ def check_telegram():
     return False
 
 
-def check():
+def check_free_video(probe=False):
+    """The free AI video engine: reachable, and with whose allowance. probe=True makes one real clip (uses one of the
+    day's free clips) and sends it to Telegram."""
+    if not freevideo.wanted():
+        print("ℹ️ Free AI video is switched off (FREE_VIDEO=off)")
+        return True
+    if not freevideo.available():
+        print("ℹ️ Free AI video engine isn't installed here (gradio_client); the GitHub workflows install it")
+        return True
+    try:
+        space = freevideo.connect()
+    except Exception as e:
+        print("❌ Free AI video:", str(e)[:200])
+        return False
+    acct = ("using your free Hugging Face account (about 3 clips a day)" if os.environ.get("HF_TOKEN", "").strip() else
+            "no HF_TOKEN yet, so only Hugging Face's tiny anonymous allowance - add HF_TOKEN (SETUP step 2)")
+    print(f"✅ Free AI video engine reachable ({space}), {acct}")
+    if not probe:
+        return True
+    import tempfile
+    out, t0 = os.path.join(tempfile.gettempdir(), "free-video-test.mp4"), time.time()
+    try:
+        freevideo.clip("POV: you stand on the deck of the Titanic at night, icy breath in the air, stars overhead, crew "
+                       "lowering a lifeboat beside you, handheld camera. Natural ambient sound only, no dialogue, no music",
+                       "9:16", 4, out)
+    except Exception as e:
+        print("❌ Free AI video test clip failed:", str(e)[:300])
+        return False
+    print(f"✅ Free AI video test clip made: {render.probe_duration(out):.1f}s, "
+          f"{'with' if video.has_audio(out) else 'without'} sound, in {time.time() - t0:.0f}s")
+    if has_telegram():
+        try:
+            telegram.send_video(out, "🧪 <b>Free AI video test</b> (LTX-2.3 on Hugging Face's free GPUs). This is the engine "
+                                "for your free daily cinematic Shorts.", filename="free-video-test.mp4")
+        except Exception as e:
+            print("ℹ️ Couldn't send the test clip to Telegram:", str(e)[:150])
+    return True
+
+
+def check(video_test=False):
     ok = True
     print("Checking the History with Me agent...\n")
     try:
@@ -841,6 +881,7 @@ def check():
             print("ℹ️ YouTube not connected yet: finished videos come to Telegram and you upload them from the YouTube app."
                   " SETUP step 3 makes uploading automatic.")
     ok = check_telegram() and ok
+    ok = check_free_video(video_test) and ok
     try:
         import piper  # noqa: F401
         print("✅ Free voice engine installed (used if Gemini can't speak)")
@@ -877,14 +918,18 @@ def main(argv=None):
     mk.add_argument("--topic", default="")
     mk.add_argument("--pictures", default="", choices=["", "auto", "gemini", "free", "archive"])
     mk.add_argument("--motion", type=int, default=None)
-    for name in ("approvals", "report", "scout", "check", "demo"):
+    for name in ("approvals", "report", "scout", "demo"):
         sub.add_parser(name)
+    ck = sub.add_parser("check")
+    ck.add_argument("--video", action="store_true", help="also make one free AI video test clip")
     a = ap.parse_args(argv)
     if setup_missing(a.cmd):
         return 0
     if a.cmd == "make":
         return make(a.kind, a.topic.strip() or None, a.pictures or None, a.motion)
-    return {"approvals": approvals, "report": report, "scout": scout_cmd, "check": check, "demo": demo}[a.cmd]()
+    if a.cmd == "check":
+        return check(video_test=a.video)
+    return {"approvals": approvals, "report": report, "scout": scout_cmd, "demo": demo}[a.cmd]()
 
 
 if __name__ == "__main__":

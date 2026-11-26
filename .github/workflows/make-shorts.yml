@@ -67,7 +67,7 @@ jobs:
           CINEMATIC: ${{ vars.CINEMATIC || 'auto' }}
           CINE_FORMATS: ${{ vars.CINE_FORMATS || 'pov,trailer' }}
           VIDEO_RESOLUTION: ${{ vars.VIDEO_RESOLUTION || '720p' }}
-          VIDEO_MODEL: ${{ vars.VIDEO_MODEL || 'gemini-omni-1.1-flash,gemini-omni-flash' }}
+          VIDEO_MODEL: ${{ vars.VIDEO_MODEL || 'gemini-omni-1.2-flash,gemini-omni-1.1-flash' }}
           SHORT_VIDEO_BUDGET: ${{ vars.SHORT_VIDEO_BUDGET || '3' }}
           LOOP_VIDEO_BUDGET: ${{ vars.LOOP_VIDEO_BUDGET || '1' }}
           MOVIE_VIDEO_BUDGET: ${{ vars.MOVIE_VIDEO_BUDGET || '3' }}
