@@ -1,0 +1,171 @@
+{
+ "updated": "2026-11-27T01:05:09.905269+05:30",
+ "deadline": "2027-02-01",
+ "rules": {
+  "before": {
+   "label": "Until 31 Jan 2027",
+   "subs": 1000,
+   "watch_hours_12m": 4000,
+   "shorts_views_90d": 10000000
+  },
+  "after": {
+   "label": "From 1 Feb 2027",
+   "subs": 1000,
+   "watch_hours_12m": 8000,
+   "shorts_views_90d": 20000000
+  },
+  "fan_funding": {
+   "label": "Fan funding (unchanged)",
+   "subs": 500,
+   "uploads_90d": 3,
+   "watch_hours_12m": 3000,
+   "shorts_views_90d": 3000000
+  }
+ },
+ "agent": {
+  "paused": false,
+  "youtube_connected": false,
+  "paid_key": false,
+  "free_video": true,
+  "schedule": {
+   "shorts": "Every day 14:11 IST",
+   "movies": "Wed & Sun 15:53 IST",
+   "approvals": "Every hour",
+   "report": "Monday 16:47 IST"
+  }
+ },
+ "budget": {
+  "month": "2026-11",
+  "spent": 0,
+  "cap": 10.0,
+  "google_video_down": false
+ },
+ "runs": {},
+ "videos": {
+  "waiting": [],
+  "recent": []
+ },
+ "ideas": {
+  "story": [
+   {
+    "topic": "POV: You're a passenger on the Titanic, 14 April 1912, 11:40 PM",
+    "series": "Timeline Twists",
+    "source": "plan",
+    "date": "2026-11-27"
+   },
+   {
+    "topic": "Quetzalcoatlus, the flying reptile as tall as a giraffe",
+    "series": "Prehistoric Giants",
+    "source": "plan",
+    "date": "2026-11-27"
+   },
+   {
+    "topic": "POV: You're a baby Tyrannosaurus, 67 million years ago",
+    "series": "Prehistoric Giants",
+    "source": "plan",
+    "date": "2026-11-28"
+   },
+   {
+    "topic": "Napoleon was not short",
+    "series": "Myth Busters",
+    "source": "plan",
+    "date": "2026-11-28"
+   },
+   {
+    "topic": "POV: You're a gladiator walking into the Colosseum",
+    "series": "Myth Busters",
+    "source": "plan",
+    "date": "2026-11-29"
+   },
+   {
+    "topic": "Rani ki Vav, the upside-down temple built for water",
+    "series": "India's Genius",
+    "source": "plan",
+    "date": "2026-11-29"
+   }
+  ],
+  "loop": [
+   {
+    "topic": "Cleopatra lived closer in time to the Moon landing than to the building of the Great Pyramid",
+    "series": "Timeline Twists",
+    "source": "plan",
+    "date": ""
+   },
+   {
+    "topic": "Sharks are older than trees",
+    "series": "Prehistoric Giants",
+    "source": "plan",
+    "date": ""
+   },
+   {
+    "topic": "Oxford University is older than the Aztec capital Tenochtitlan",
+    "series": "Timeline Twists",
+    "source": "plan",
+    "date": ""
+   },
+   {
+    "topic": "Tyrannosaurus lived closer in time to you than to Stegosaurus",
+    "series": "Prehistoric Giants",
+    "source": "plan",
+    "date": ""
+   }
+  ],
+  "movie": [
+   {
+    "topic": "Megalodon: the rise and fall of the biggest shark that ever lived",
+    "series": "Prehistoric Giants",
+    "source": "plan",
+    "date": "2026-11-29"
+   },
+   {
+    "topic": "The Library of Alexandria: what really destroyed it",
+    "series": "Myth Busters",
+    "source": "plan",
+    "date": "2026-12-02"
+   },
+   {
+    "topic": "The Indus Valley Civilization: the lost cities with plumbing before Rome",
+    "series": "India's Genius",
+    "source": "plan",
+    "date": "2026-12-09"
+   }
+  ]
+ },
+ "trends": {
+  "at": null,
+  "items": []
+ },
+ "insights": {},
+ "review": {
+  "date": null,
+  "summary": "",
+  "moves": [],
+  "double_down": []
+ },
+ "series": [
+  {
+   "name": "Prehistoric Giants",
+   "about": "dinosaurs, sea monsters, megafauna and early humans, grounded in real paleontology"
+  },
+  {
+   "name": "Timeline Twists",
+   "about": "famous moments with a twist most people never heard"
+  },
+  {
+   "name": "World War Stories",
+   "about": "human stories from the World Wars, told with respect, never glorifying violence"
+  },
+  {
+   "name": "Dig Discoveries",
+   "about": "archaeology finds that rewrote what we thought we knew"
+  },
+  {
+   "name": "India's Genius",
+   "about": "the inventions, cities, scholars and rulers of ancient and medieval India"
+  },
+  {
+   "name": "Myth Busters",
+   "about": "popular history myths flipped with the real story and the evidence"
+  }
+ ]
+}
