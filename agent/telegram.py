@@ -2,6 +2,7 @@
 import html
 import json
 import os
+import re
 
 import requests
 
@@ -15,7 +16,47 @@ def _url(method):
 
 
 def chat():
-    return str(os.environ.get("TELEGRAM_CHAT_ID", "")).strip()
+    return str(os.environ.get("TELEGRAM_CHAT_ID", "")).strip().strip("\"'` ").strip()
+
+
+def chat_problem(value=None):
+    """Why TELEGRAM_CHAT_ID can't work ('' when it looks right). Never echoes the value: the logs are public."""
+    v = chat() if value is None else str(value).strip()
+    if not v:
+        return "it is not saved yet"
+    if re.fullmatch(r"-?\d{3,20}", v):
+        return ""
+    low = v.lower()
+    if "t.me" in low or "http" in low or "/" in v:
+        return "it looks like a link, but it must be the number the bot sends you"
+    if re.search(r"\d+:[\w-]{20,}", v):
+        return "it looks like the bot token, but it must be the number the bot sends you"
+    if re.search(r"[a-z]", low):
+        return "it contains letters, but it must be the number the bot sends you"
+    return "it must be only the number the bot sends you (digits, nothing else)"
+
+
+def private_chat(update):
+    """The private chat an update came from (None for groups and channels)."""
+    cq = update.get("callback_query") or {}
+    c = ((update.get("message") or cq.get("message") or {}).get("chat")) or {}
+    return c.get("id") if c.get("type") == "private" and c.get("id") else None
+
+
+def chat_id_note(cid):
+    return (f"Your chat id is {cid}\n\nSave this number in GitHub: your repository → Settings → Secrets and variables → "
+            "Actions → TELEGRAM_CHAT_ID (edit it, or New repository secret). Paste only the number: no link, no name.")
+
+
+def reachable():
+    """True when the bot can message the owner's chat (checked before spending money on a video)."""
+    if chat_problem():
+        return False
+    try:
+        call("getChat", chat_id=chat())
+        return True
+    except Exception:
+        return False
 
 
 def call(method, files=None, **data):

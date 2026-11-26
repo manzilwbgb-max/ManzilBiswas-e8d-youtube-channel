@@ -22,19 +22,22 @@ The schedules are already switched on: until the secrets are in, each run just n
 
 1. In Telegram open **@BotFather** → send `/newbot` → name it (e.g. *History with Me Agent*) →
    pick a username ending in `bot`. BotFather replies with a **token** → save it as the secret `TELEGRAM_BOT_TOKEN`.
-2. Open your new bot and send it any message (e.g. `hi`).
-3. In GitHub: **Actions → Check setup → Run workflow**. The bot replies with your chat id →
-   save it as the secret `TELEGRAM_CHAT_ID`. (Only messages from this chat are obeyed.)
+2. Open your new bot (BotFather gives you its t.me link) and press **Start** (or send `hi`).
+3. In GitHub: **Actions → Check setup → Run workflow**. The bot sends you *"Your chat id is 123456789"* →
+   save **only that number** as the secret `TELEGRAM_CHAT_ID` — not the bot's link or name.
+   Only messages from this chat are obeyed. If the saved value is wrong, Check setup says so and the bot sends
+   you the right number again.
 
 ## 2. Gemini API key (3 min)
 
 1. Open https://aistudio.google.com/apikey → **Create API key** → save it as `GEMINI_API_KEY`.
    The free tier is enough for the agent's brain and, while its quota lasts, the voice.
-2. For cinematic AI video (and Gemini pictures): in AI Studio, **set up billing** on the key's project — video has no
-   free tier. See PLAYBOOK.md for what it costs and how to cap it.
-   Your Gemini (Google AI Pro) app subscription doesn't pay for API calls by itself, but Google AI Pro can come with
-   monthly Google Cloud credits you can claim in AI Studio and spend on the Gemini API (availability varies by country).
-   Set a budget alert in Google Cloud Billing.
+2. For cinematic AI video (and Gemini pictures): open https://aistudio.google.com/billing and **set up billing** on
+   the key's project — video has no free tier. Google asks for a small first prepayment, and when the prepaid
+   balance reaches $0 every key on that billing account pauses until you top up, so keep a few dollars in it.
+   Your Gemini (Google AI Pro) app subscription doesn't pay for API calls by itself, but it includes
+   **$10 a month of Google Cloud credit** you can claim on the same billing page (main subscriber only; each
+   month's credit lasts 12 months). See PLAYBOOK.md for what videos cost and how to cap it.
 
 ## 3. YouTube permission (15 min, computer recommended)
 

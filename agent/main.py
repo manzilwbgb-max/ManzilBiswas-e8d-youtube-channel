@@ -237,6 +237,10 @@ def make(kind, topic=None, pictures=None, motion=None):
     if load("control.json", {}).get("paused") and not topic:
         log("the agent is paused (send /resume on Telegram)")
         return 0
+    if not DRY and not telegram.reachable():
+        print("::error::Telegram can't reach your chat, so nothing was made and nothing was spent. "
+              "Run 'Check setup': it tells you what to fix (usually the TELEGRAM_CHAT_ID secret).")
+        return 1
     kinds = ["story", "loop"] if kind == "both" else [kind]
     trends, failed = None, 0
     if len(kinds) > 1:
@@ -531,11 +535,23 @@ def approvals():
     except Exception as e:
         log("could not read Telegram:", e)
         ups = []
+    owner_ok, replied = None, set()
     for u in ups:
         st["offset"] = max(int(st.get("offset", 0)), u["update_id"])
         save("telegram.json", st)
         if not telegram.from_owner(u):
             log("ignored a message from another chat")
+            c = telegram.private_chat(u)
+            if c and c not in replied and len(replied) < 3:
+                if owner_ok is None:
+                    owner_ok = telegram.reachable()
+                if not owner_ok:  # setup unfinished: tell the sender their chat id so the owner can save it
+                    replied.add(c)
+                    try:
+                        telegram.call("sendMessage", chat_id=c, text="🔒 This bot only takes orders from its owner.\n\n"
+                                      "If that's you: " + telegram.chat_id_note(c))
+                    except Exception:
+                        pass
             continue
         try:
             cq = u.get("callback_query")
@@ -724,6 +740,48 @@ def demo():
     return 0
 
 
+def check_telegram():
+    """Bot token, chat id and a hello. A wrong chat id gets the right one sent to you in Telegram."""
+    if not os.environ.get("TELEGRAM_BOT_TOKEN", "").strip():
+        print("❌ Telegram: TELEGRAM_BOT_TOKEN is missing")
+        return False
+    try:
+        me = telegram.call("getMe")
+        bot = me.get("username", "") if isinstance(me, dict) else ""
+        print(f"✅ Telegram bot token works (@{bot or '?'})")
+    except Exception as e:
+        print("❌ Telegram:", e, "| If it says Unauthorized, the TELEGRAM_BOT_TOKEN secret is not the bot's token: "
+              "copy it again from @BotFather → /mybots → your bot → API Token.")
+        return False
+    problem = telegram.chat_problem()
+    if not problem:
+        try:
+            telegram.send("✅ History with Me agent is connected. Send /help to see what I can do.")
+            print("✅ Telegram message sent to your chat")
+            return True
+        except Exception as e:
+            problem = (f"Telegram can't deliver to it ({str(e)[:120]}) - the number is wrong, or you haven't pressed "
+                       "Start in the bot yet")
+    print(f"❌ TELEGRAM_CHAT_ID: {problem}.")
+    try:
+        seen = []
+        for u in telegram.updates(0):  # offset 0 reads without confirming, so no message is used up
+            c = telegram.private_chat(u)
+            if c and c not in seen:
+                seen.append(c)
+        for cid in seen[-3:]:
+            telegram.call("sendMessage", chat_id=cid, text=telegram.chat_id_note(cid))
+        if seen:
+            print("ℹ️ I sent your chat id to you in Telegram (not shown here because these logs are public). "
+                  "Save it as the secret TELEGRAM_CHAT_ID, then run Check setup again.")
+        else:
+            print(f"ℹ️ Open https://t.me/{bot or 'your_bot'} in Telegram, press Start (or send hi), then run Check "
+                  "setup again - the bot will send you your chat id.")
+    except Exception as e:
+        print("ℹ️ Couldn't read the bot's messages:", str(e)[:150])
+    return False
+
+
 def check():
     ok = True
     print("Checking the History with Me agent...\n")
@@ -761,37 +819,7 @@ def check():
         else:
             print("ℹ️ YouTube not connected yet: finished videos come to Telegram and you upload them from the YouTube app."
                   " SETUP step 3 makes uploading automatic.")
-    if os.environ.get("TELEGRAM_BOT_TOKEN") and not telegram.chat():
-        try:
-            me = telegram.call("getMe")
-            print(f"✅ Telegram bot token works (@{me.get('username', '?') if isinstance(me, dict) else '?'})")
-            seen = {}
-            for u in telegram.updates(0):
-                c = ((u.get("message") or {}).get("chat")) or {}
-                if c.get("id"):
-                    seen[c["id"]] = c.get("first_name") or c.get("title") or ""
-            for cid, name in seen.items():
-                telegram.call("sendMessage", chat_id=cid, text=(
-                    f"Your chat id is {cid}\n\nSave this number in GitHub: your repository → Settings → Secrets and "
-                    "variables → Actions → New repository secret. Name: TELEGRAM_CHAT_ID, Secret: the number above."))
-                print("ℹ️ Found your Telegram chat: I sent your chat id to you in Telegram (not shown here because "
-                      "these logs are public). Save it as the secret TELEGRAM_CHAT_ID.")
-            if not seen:
-                print("ℹ️ Send any message to your bot on Telegram, then run Check setup again to get your chat id.")
-        except Exception as e:
-            print("❌ Telegram:", e, "| If it says Unauthorized, the TELEGRAM_BOT_TOKEN secret is not the bot's token: "
-                  "copy it again from @BotFather → /mybots → your bot → API Token.")
-        ok = False
-    elif has_telegram():
-        try:
-            telegram.send("✅ History with Me agent is connected. Send /help to see what I can do.")
-            print("✅ Telegram message sent")
-        except Exception as e:
-            ok = False
-            print("❌ Telegram:", e)
-    else:
-        ok = False
-        print("❌ Telegram: TELEGRAM_BOT_TOKEN is missing")
+    ok = check_telegram() and ok
     try:
         import piper  # noqa: F401
         print("✅ Free voice engine installed (used if Gemini can't speak)")
