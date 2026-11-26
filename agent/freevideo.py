@@ -73,10 +73,12 @@ def connect():
     last = None
     for space in SPACES:
         try:
+            # download_files=False: we fetch the finished clip ourselves, with retries (a refused download would
+            # otherwise throw away a clip that already used one of the day's free GPU runs)
             try:
-                client = Client(space, token=_token(), verbose=False)
+                client = Client(space, token=_token(), verbose=False, download_files=False)
             except TypeError:  # older gradio_client
-                client = Client(space, hf_token=_token(), verbose=False)
+                client = Client(space, hf_token=_token(), verbose=False, download_files=False)
             _state["endpoint"], _state["params"] = _endpoint(client)
             _state["client"], _state["space"] = client, space
             return space
@@ -86,14 +88,52 @@ def connect():
     raise RuntimeError(f"free AI video unavailable: {str(last)[:200]}")
 
 
-def _video_path(result):
-    v = result[0] if isinstance(result, (list, tuple)) else result
-    for _ in range(3):
-        if isinstance(v, dict):
-            v = v.get("video") or v.get("path") or v.get("value") or v.get("url")
-    if not v or not os.path.exists(str(v)):
-        raise RuntimeError(f"no video file came back ({str(result)[:160]})")
-    return str(v)
+def _video_ref(result):
+    """The output video in the Space's answer: a local path, a URL, or the Space's file info (path / url)."""
+    todo = [result]
+    while todo:
+        v = todo.pop(0)
+        if isinstance(v, (list, tuple)):
+            todo.extend(v)
+        elif isinstance(v, dict):
+            if v.get("url") or (v.get("path") and not isinstance(v.get("path"), dict)):
+                return v
+            todo.extend(x for x in v.values() if isinstance(x, (dict, list, tuple, str)))
+        elif isinstance(v, str) and (v.startswith("http") or v.lower().endswith((".mp4", ".webm", ".mov"))):
+            return v
+    raise RuntimeError(f"no video came back ({str(result)[:160]})")
+
+
+def _fetch(ref, out_path):
+    """Save the clip: copy a local file, or download it from the Space (a few tries; downloads are free)."""
+    import requests
+    client = _state["client"]
+    if isinstance(ref, dict):
+        url, path = ref.get("url"), ref.get("path")
+    else:
+        url, path = (ref, None) if str(ref).startswith("http") else (None, ref)
+    if path and os.path.exists(str(path)):
+        shutil.copyfile(str(path), out_path)
+        return
+    if not url and path:
+        from gradio_client import utils as gu
+        url = client.src_prefixed + "file=" + gu.encode_file_path(path)
+    last = "no address"
+    for wait in (0, 3, 8, 15, 30):
+        time.sleep(wait)
+        try:
+            with requests.get(url, headers=dict(getattr(client, "headers", None) or {}),
+                              cookies=dict(getattr(client, "cookies", None) or {}), stream=True, timeout=120) as r:
+                if r.status_code == 200:
+                    with open(out_path, "wb") as f:
+                        for chunk in r.iter_content(1 << 16):
+                            f.write(chunk)
+                    if os.path.getsize(out_path) > 1000:
+                        return
+                last = f"HTTP {r.status_code}"
+        except requests.RequestException as e:
+            last = str(e)[:120]
+    raise RuntimeError(f"the clip was made but couldn't be downloaded from the Space ({last})")
 
 
 def clip(prompt, aspect, seconds, out_path, first_frame=None):
@@ -125,7 +165,7 @@ def clip(prompt, aspect, seconds, out_path, first_frame=None):
             if any(w in msg.lower() for w in QUOTA_WORDS):
                 _state["dead"] = "free daily GPU allowance used up (" + msg[:160] + ")"
             raise RuntimeError("free AI video failed: " + msg[:300])
-        shutil.copyfile(_video_path(result), out_path)
+        _fetch(_video_ref(result), out_path)
         _state["used"] += 1
         log(f"free AI video shot ready ({secs:.0f}s, {_state['space']}, {time.time() - t0:.0f}s)")
         return out_path
