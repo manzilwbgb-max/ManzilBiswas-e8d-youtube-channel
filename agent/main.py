@@ -124,7 +124,9 @@ def fit(lines, limit=1000):
 def video_engine(kind, budget):
     """Google's video model when this Short's budget covers it (best quality), else the free engine, else pictures."""
     omni = video.available() and budget > 0
-    if omni and budget >= video.price(22 if kind == "story" else 8) and not (freevideo.available() and video.known_dead()):
+    paid = bool(os.environ.get("GEMINI_PAID_KEY", "").strip())  # no paid key: plan for the free engine (Omni stays a backup)
+    if omni and budget >= video.price(22 if kind == "story" else 8) and \
+            not (freevideo.available() and (video.known_dead() or not paid)):
         return "omni"
     if freevideo.available():
         return "free"
