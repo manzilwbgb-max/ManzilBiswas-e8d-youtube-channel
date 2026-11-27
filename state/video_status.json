@@ -1,0 +1,4 @@
+{
+ "dead": "429: {\"error\":{\"message\":\"Rate limit exceeded for model gemini-omni-1.2-flash (limit: 0 requests per day on Free Tier). Please upgrade your tier at https://ai.dev/rate-limit.\",\"code\":\"too_many_request",
+ "at": "2026-11-27T15:23:55.128370+05:30"
+}

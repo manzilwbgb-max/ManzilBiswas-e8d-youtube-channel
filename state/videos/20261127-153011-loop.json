@@ -1,0 +1,71 @@
+{
+ "id": "20261127-153011-loop",
+ "kind": "loop",
+ "title": "Tyrannosaurus Rex Lived Closer to Humans Than Stegosaurus",
+ "description": "Tyrannosaurus lived closer in time to humans than to Stegosaurus. While pop culture constantly pairs them together, T. rex roamed North America sixty-six million years ago, whereas Stegosaurus vanished nearly eighty million years prior. First uncovered in Colorado during the nineteenth-century Bone Wars, these iconic giants never shared the Earth. Which prehistoric timeline surprise shocked you the most?\n\nNew history movies every Wednesday and Sunday on History with Me.\n\nSources\n- Tyrannosaurus: https://en.wikipedia.org/wiki/Tyrannosaurus\n- Stegosaurus: https://en.wikipedia.org/wiki/Stegosaurus\n\nNarration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing.\n\n#history #shorts #dinosaurs #prehistoric",
+ "tags": [
+  "Tyrannosaurus lived closer in time to humans than to Stegosaurus",
+  "T-rex lived closer to humans than Stegosaurus",
+  "Tyrannosaurus rex timeline",
+  "how long between stegosaurus and t-rex",
+  "did t-rex and stegosaurus live together",
+  "dinosaur timeline facts",
+  "Tyrannosaurus rex",
+  "Stegosaurus",
+  "Laramidia",
+  "66 million years ago",
+  "history",
+  "history facts",
+  "weird history",
+  "history shorts",
+  "prehistoric animals",
+  "dinosaurs",
+  "paleontology",
+  "history with me"
+ ],
+ "pinned_comment": "Did you grow up assuming T. rex and Stegosaurus fought each other?",
+ "series": "Prehistoric Giants",
+ "format": "time-gap",
+ "topic": "Tyrannosaurus lived closer in time to humans than to Stegosaurus",
+ "idea": "l04-trex-stegosaurus",
+ "idea_source": "plan",
+ "why": "Shatters a universally held pop-culture myth about dinosaurs using mind-bending deep-time math.",
+ "made": "2026-11-27T15:30:49.355566+05:30",
+ "duration": 17.78,
+ "status": "waiting",
+ "caption": "🎬 <b>Loop Short ready</b> · 18 s · Prehistoric Giants\n<b>Tyrannosaurus Rex Lived Closer to Humans Than Stegosaurus</b>\nHook: “T-Rex lived closer to you than Stegosaurus”\nWhy now: Shatters a universally held pop-culture myth about dinosaurs using mind-bending deep-time math.\nFact check: high (1 fixes) · source: Tyrannosaurus\nFormat: loop · Shots: 1 archive photo, 1 free AI picture · Voice: gemini\n⚠️ 18 s is long for a loop (aim 5-12 s)\nYouTube isn't connected yet: save this video and upload it from the YouTube app, then tap ✅.",
+ "fact_check": {
+  "changes": [
+   "Slightly rephrased the end of scene 2 narration to remove trailing fragment ('That's why...') while maintaining the accurate time gap (~80 million years between Late Jurassic Stegosaurus at ~145 Ma and Late Cretaceous T. rex at ~66 Ma vs ~66 million years to present day) and keeping word count within 15%."
+  ],
+  "confidence": "high"
+ },
+ "sources": [
+  {
+   "title": "Tyrannosaurus",
+   "url": "https://en.wikipedia.org/wiki/Tyrannosaurus"
+  },
+  {
+   "title": "Stegosaurus",
+   "url": "https://en.wikipedia.org/wiki/Stegosaurus"
+  }
+ ],
+ "warnings": [
+  "18 s is long for a loop (aim 5-12 s)"
+ ],
+ "pictures": {
+  "archive": 1,
+  "free_ai": 1
+ },
+ "video_usd": 0.0,
+ "release": {
+  "id": 460423466,
+  "assets": {
+   "video.mp4": 799931596
+  },
+  "links": {
+   "video.mp4": "https://github.com/manzilwbgb-max/ManzilBiswas-e8d-youtube-channel/releases/download/untagged-cdad9711e48f03978b6c/video.mp4"
+  }
+ },
+ "message_id": 37
+}

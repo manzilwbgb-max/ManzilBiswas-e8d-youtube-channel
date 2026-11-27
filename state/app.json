@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T14:40:55.673480+05:30",
+ "updated": "2026-11-27T15:30:55.880720+05:30",
  "deadline": "2027-02-01",
  "rules": {
   "before": {
@@ -38,21 +38,123 @@
   "month": "2026-11",
   "spent": 0,
   "cap": 10.0,
-  "google_video_down": false
+  "google_video_down": true
  },
- "runs": {},
+ "runs": {
+  "story": {
+   "at": "2026-11-27T15:24:49.461186+05:30",
+   "ok": true,
+   "title": "Titanic 1912: What Passengers Did Right After Impact",
+   "id": "20261127-152109-story",
+   "error": ""
+  },
+  "loop": {
+   "at": "2026-11-27T15:30:55.879951+05:30",
+   "ok": true,
+   "title": "Tyrannosaurus Rex Lived Closer to Humans Than Stegosaurus",
+   "id": "20261127-153011-loop",
+   "error": ""
+  }
+ },
  "videos": {
-  "waiting": [],
+  "waiting": [
+   {
+    "id": "20261127-153011-loop",
+    "kind": "loop",
+    "title": "Tyrannosaurus Rex Lived Closer to Humans Than Stegosaurus",
+    "topic": "Tyrannosaurus lived closer in time to humans than to Stegosaurus",
+    "series": "Prehistoric Giants",
+    "format": "time-gap",
+    "status": "waiting",
+    "made": "2026-11-27T15:30:49.355566+05:30",
+    "seconds": 18,
+    "usd": 0.0,
+    "engine": "archive photos",
+    "video_id": null,
+    "published": null,
+    "why": "Shatters a universally held pop-culture myth about dinosaurs using mind-bending deep-time math.",
+    "warnings": [
+     "18 s is long for a loop (aim 5-12 s)"
+    ],
+    "description": "Tyrannosaurus lived closer in time to humans than to Stegosaurus. While pop culture constantly pairs them together, T. rex roamed North America sixty-six million years ago, whereas Stegosaurus vanished nearly eighty million years prior. First uncovered in Colorado during the nineteenth-century Bone Wars, these iconic giants never shared the Earth. Which prehistoric timeline surprise shocked you the most?\n\nNew history movies every Wednesday and Sunday on History with Me.\n\nSources\n- Tyrannosaurus: https://en.wikipedia.org/wiki/Tyrannosaurus\n- Stegosaurus: https://en.wikipedia.org/wiki/Stegosaurus\n\nNarration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing.\n\n#history #shorts #dinosaurs #prehistoric",
+    "tags": [
+     "Tyrannosaurus lived closer in time to humans than to Stegosaurus",
+     "T-rex lived closer to humans than Stegosaurus",
+     "Tyrannosaurus rex timeline",
+     "how long between stegosaurus and t-rex",
+     "did t-rex and stegosaurus live together",
+     "dinosaur timeline facts",
+     "Tyrannosaurus rex",
+     "Stegosaurus",
+     "Laramidia",
+     "66 million years ago",
+     "history",
+     "history facts",
+     "weird history",
+     "history shorts",
+     "prehistoric animals",
+     "dinosaurs",
+     "paleontology",
+     "history with me"
+    ],
+    "pinned_comment": "Did you grow up assuming T. rex and Stegosaurus fought each other?",
+    "public": "",
+    "release": 460423466,
+    "assets": {
+     "video.mp4": 799931596
+    }
+   },
+   {
+    "id": "20261127-152109-story",
+    "kind": "story",
+    "title": "Titanic 1912: What Passengers Did Right After Impact",
+    "topic": "POV: You're a passenger on the Titanic, 14 April 1912, 11:40 PM",
+    "series": "Timeline Twists",
+    "format": "pov",
+    "status": "waiting",
+    "made": "2026-11-27T15:24:42.556391+05:30",
+    "seconds": 30,
+    "usd": 0.0,
+    "engine": "free AI pictures",
+    "video_id": null,
+    "published": null,
+    "why": "The chilling disconnect between impending catastrophe and the mundane, playful reaction of real survivors creates an immediate, high-retention hook.",
+    "warnings": [
+     "free AI video is used up for today",
+     "AI video unavailable (AI video unavailable: 429: {\"error\":{\"message\":\"Rate limit exceeded for model gemini-omni-1.2-flash (limit: 0 requests per day on Free Tie",
+     "2 shot(s) used pictures with camera moves (no AI video left for them)"
+    ],
+    "description": "The Sinking of the Titanic in 1912 began with a deceptive calm. On April 14, 1912, in the North Atlantic, the RMS Titanic struck an iceberg after receiving seven wireless ice warnings earlier that day. While water rushed into six forward compartments, passengers on deck initially played with the fallen ice unaware of their fate. Would you have stayed in your cabin or rushed for a lifeboat?\n\nNew history movies every Wednesday and Sunday on History with Me.\n\nSources\n- Sinking of the Titanic: https://en.wikipedia.org/wiki/Sinking_of_the_Titanic\n- Titanic: https://en.wikipedia.org/wiki/Titanic\n\nNarration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing.\n\n#history #shorts #titanic #historyfacts",
+    "tags": [
+     "sinking of the titanic",
+     "titanic 1912",
+     "rms titanic",
+     "what happened right after titanic hit iceberg",
+     "how did passengers react on titanic",
+     "why did titanic sink",
+     "titanic timeline",
+     "southampton",
+     "new york",
+     "1912",
+     "north atlantic",
+     "history",
+     "history facts",
+     "history shorts",
+     "history stories",
+     "history with me"
+    ],
+    "pinned_comment": "If you felt a faint shudder on an 'unsinkable' ship, would you stay in bed or head for the lifeboats?",
+    "public": "",
+    "release": 460416826,
+    "assets": {
+     "video.mp4": 799912650
+    }
+   }
+  ],
   "recent": []
  },
  "ideas": {
   "story": [
-   {
-    "topic": "POV: You're a passenger on the Titanic, 14 April 1912, 11:40 PM",
-    "series": "Timeline Twists",
-    "source": "plan",
-    "date": "2026-11-27"
-   },
    {
     "topic": "Quetzalcoatlus, the flying reptile as tall as a giraffe",
     "series": "Prehistoric Giants",
@@ -82,6 +184,12 @@
     "series": "India's Genius",
     "source": "plan",
     "date": "2026-11-29"
+   },
+   {
+    "topic": "POV: The Black Death reaches your town, 1348",
+    "series": "Timeline Twists",
+    "source": "plan",
+    "date": "2026-11-30"
    }
   ],
   "loop": [
@@ -104,8 +212,8 @@
     "date": ""
    },
    {
-    "topic": "Tyrannosaurus lived closer in time to you than to Stegosaurus",
-    "series": "Prehistoric Giants",
+    "topic": "The shortest war in history lasted under an hour (Anglo-Zanzibar War, 1896)",
+    "series": "Timeline Twists",
     "source": "plan",
     "date": ""
    }
