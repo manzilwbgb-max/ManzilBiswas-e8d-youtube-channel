@@ -65,7 +65,11 @@ def snapshot(p=None):
         vids = sorted(items("videos"), key=lambda nr: nr[1].get("made", ""), reverse=True)
         waiting = [dict(_row(n, r), description=(r.get("description") or "")[:5000], tags=(r.get("tags") or [])[:30],
                         pinned_comment=(r.get("pinned_comment") or "")[:500],
-                        public=(r.get("public") or {}).get("video", "")) for n, r in vids if r.get("status") == "waiting"]
+                        public=(r.get("public") or {}).get("video", ""),
+                        release=(r.get("release") or {}).get("id"),
+                        assets={k: v for k, v in ((r.get("release") or {}).get("assets") or {}).items()
+                                if k in ("video.mp4", "thumbnail.jpg")})
+                   for n, r in vids if r.get("status") == "waiting"]
         recent = [_row(n, r) for n, r in vids if r.get("status") != "waiting"][:20]
         reports = items("reports")
         review = (reports[-1][1].get("review") if reports else None) or {}

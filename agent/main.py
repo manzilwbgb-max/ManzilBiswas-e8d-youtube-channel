@@ -10,6 +10,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import shutil
 import sys
 import time
@@ -671,20 +672,34 @@ def run_command(c, p):
             return
         store.forget(rec["release"]["id"], tag=f"pending-{rid}" if rec.get("public") else None)
         when = str(c.get("publish_at") or "")[:30]
-        privacy = str(c.get("privacy") or "public")[:10]
-        rec.update(status="uploaded", release=None, public=None, uploaded=now().isoformat(), uploaded_via="vidIQ",
+        privacy = "private" if str(c.get("privacy") or "public").lower() == "private" else "public"
+        via = "n8n" if str(c.get("via") or "").lower() == "n8n" else "vidIQ"
+        vid = str(c.get("video_id") or "")
+        vid = vid if re.fullmatch(r"[A-Za-z0-9_-]{11}", vid) else ""
+        labelled = via == "n8n" and c.get("ai_label") is True
+        commented = via == "n8n" and c.get("comment_posted") is True
+        status = ("scheduled" if when else "published" if privacy == "public" else "private") if vid else "uploaded"
+        rec.update(status=status, release=None, public=None, uploaded=now().isoformat(), uploaded_via=via,
                    youtube_post=str(c.get("post_id") or "")[:80], privacy=privacy, publish_at=when or None)
+        if vid:
+            rec["video_id"] = vid
         put("videos", rid, rec)
-        line = (f"✅ Sent to YouTube from the app ({'scheduled ' + when if when else privacy}). "
+        todo = []
+        if not labelled:
+            todo.append("In YouTube Studio set <b>Altered or synthetic content</b> to Yes.")
+        comment = telegram.esc(rec.get("pinned_comment", ""))
+        todo.append(f"Pin the comment I posted: {comment}" if commented else f"Pin this comment: {comment}")
+        where = f"scheduled for {when}" if when else privacy
+        line = (f"✅ Uploaded from your Studio ({where})" + (f": https://youtu.be/{vid}" if vid else ".")
+                if via == "n8n" else f"✅ Sent to YouTube from the app ({'scheduled ' + when if when else privacy}). "
                 "In YouTube Studio set Altered or synthetic content: Yes, and pin the comment below.")
         if rec.get("message_id"):
             try:
                 telegram.edit_caption(rec["message_id"], fit([line, ""] + rec.get("caption", rec["title"]).split("\n"), 1024))
             except Exception as e:
                 log("couldn't update the Telegram message:", e)
-        tell(f"✅ <b>{telegram.esc(rec['title'])}</b> is on its way to YouTube.\n"
-             "Studio → Content → this video → Details: set <b>Altered or synthetic content</b> to Yes.\n"
-             f"Pin this comment: {telegram.esc(rec.get('pinned_comment', ''))}")
+        tell(f"✅ <b>{telegram.esc(rec['title'])}</b> is on YouTube" + (f": https://youtu.be/{vid}" if vid else ".") + "\n"
+             + "\n".join(todo))
     elif action == "idea":
         kind = str(c.get("kind") or "story")
         kind = kind if kind in ("story", "loop", "movie") else "story"

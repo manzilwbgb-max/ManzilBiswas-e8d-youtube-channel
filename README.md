@@ -51,6 +51,10 @@ A private Claude app (only you can open it; it uses your own connections) sits o
 The app talks to the agent through small files in `commands/` (the *App commands* workflow runs them, for the
 repository owner's own pushes only) and reads `state/app.json`, which every run refreshes.
 
+The Claude app needs claude.ai in a browser: inside the Claude phone app its buttons can't reach your connections.
+For your phone there is also an **n8n version in SDK format** in [`n8n/`](n8n/README.md): the same buttons as a
+private web page, which uploads straight to YouTube and sets the AI label itself. It needs an active n8n plan.
+
 ## Free or paid — your choice, any time
 
 | Part | Free (no billing) | With Gemini API billing |
