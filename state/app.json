@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T16:28:45.310517+05:30",
+ "updated": "2026-11-27T17:29:57.228206+05:30",
  "deadline": "2027-02-01",
  "rules": {
   "before": {
@@ -103,7 +103,9 @@
     "assets": {
      "video.mp4": 799931596
     }
-   },
+   }
+  ],
+  "recent": [
    {
     "id": "20261127-152109-story",
     "kind": "story",
@@ -111,7 +113,7 @@
     "topic": "POV: You're a passenger on the Titanic, 14 April 1912, 11:40 PM",
     "series": "Timeline Twists",
     "format": "pov",
-    "status": "waiting",
+    "status": "uploaded",
     "made": "2026-11-27T15:24:42.556391+05:30",
     "seconds": 30,
     "usd": 0.0,
@@ -123,35 +125,9 @@
      "free AI video is used up for today",
      "AI video unavailable (AI video unavailable: 429: {\"error\":{\"message\":\"Rate limit exceeded for model gemini-omni-1.2-flash (limit: 0 requests per day on Free Tie",
      "2 shot(s) used pictures with camera moves (no AI video left for them)"
-    ],
-    "description": "The Sinking of the Titanic in 1912 began with a deceptive calm. On April 14, 1912, in the North Atlantic, the RMS Titanic struck an iceberg after receiving seven wireless ice warnings earlier that day. While water rushed into six forward compartments, passengers on deck initially played with the fallen ice unaware of their fate. Would you have stayed in your cabin or rushed for a lifeboat?\n\nNew history movies every Wednesday and Sunday on History with Me.\n\nSources\n- Sinking of the Titanic: https://en.wikipedia.org/wiki/Sinking_of_the_Titanic\n- Titanic: https://en.wikipedia.org/wiki/Titanic\n\nNarration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing.\n\n#history #shorts #titanic #historyfacts",
-    "tags": [
-     "sinking of the titanic",
-     "titanic 1912",
-     "rms titanic",
-     "what happened right after titanic hit iceberg",
-     "how did passengers react on titanic",
-     "why did titanic sink",
-     "titanic timeline",
-     "southampton",
-     "new york",
-     "1912",
-     "north atlantic",
-     "history",
-     "history facts",
-     "history shorts",
-     "history stories",
-     "history with me"
-    ],
-    "pinned_comment": "If you felt a faint shudder on an 'unsinkable' ship, would you stay in bed or head for the lifeboats?",
-    "public": "",
-    "release": 460416826,
-    "assets": {
-     "video.mp4": 799912650
-    }
+    ]
    }
-  ],
-  "recent": []
+  ]
  },
  "ideas": {
   "story": [

@@ -30,7 +30,7 @@
  "why": "The chilling disconnect between impending catastrophe and the mundane, playful reaction of real survivors creates an immediate, high-retention hook.",
  "made": "2026-11-27T15:24:42.556391+05:30",
  "duration": 30.0,
- "status": "waiting",
+ "status": "uploaded",
  "caption": "🎬 <b>Story Short ready</b> · 30 s · Timeline Twists\n<b>Titanic 1912: What Passengers Did Right After Impact</b>\nHook: “POV: Titanic, April 14, 1912, 11:40 PM”\nWhy now: The chilling disconnect between impending catastrophe and the mundane, playful reaction of real survivors creates an immediate, high-retention hook.\nFact check: high (2 fixes) · source: Sinking of the Titanic\nFormat: pov · Shots: 1 free AI video, 2 free AI picture · Voice: gemini\n⚠️ free AI video is used up for today\n⚠️ AI video unavailable (AI video unavailable: 429: {\"error\":{\"message\":\"Rate limit exceeded for model gemini-omni-1.2-flash (limit: 0 requests per day on Free Tier))\n⚠️ 2 shot(s) used pictures with camera moves (no AI video left for them)\nYouTube isn't connected yet: save this video and upload it from the YouTube app, then tap ✅.",
  "fact_check": {
   "changes": [
@@ -59,14 +59,7 @@
   "free_ai": 2
  },
  "video_usd": 0.0,
- "release": {
-  "id": 460416826,
-  "assets": {
-   "video.mp4": 799912650
-  },
-  "links": {
-   "video.mp4": "https://github.com/manzilwbgb-max/ManzilBiswas-e8d-youtube-channel/releases/download/untagged-98b6ac38d54da54de27c/video.mp4"
-  }
- },
- "message_id": 35
+ "release": null,
+ "message_id": 35,
+ "uploaded": "2026-11-27T17:29:55.306074+05:30"
 }
