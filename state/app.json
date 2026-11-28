@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-28T14:26:04.503303+05:30",
+ "updated": "2026-11-28T15:12:54.599661+05:30",
  "deadline": "2027-02-01",
  "rules": {
   "before": {
@@ -38,26 +38,120 @@
   "month": "2026-11",
   "spent": 0,
   "cap": 10.0,
-  "google_video_down": false
+  "google_video_down": true
  },
  "runs": {
   "story": {
-   "at": "2026-11-27T15:24:49.461186+05:30",
+   "at": "2026-11-28T15:11:11.620382+05:30",
    "ok": true,
-   "title": "Titanic 1912: What Passengers Did Right After Impact",
-   "id": "20261127-152109-story",
+   "title": "Quetzalcoatlus: How a Giraffe-Sized Monster Flew",
+   "id": "20261128-150606-story",
    "error": ""
   },
   "loop": {
-   "at": "2026-11-27T15:30:55.879951+05:30",
+   "at": "2026-11-28T15:12:54.598868+05:30",
    "ok": true,
-   "title": "Tyrannosaurus Rex Lived Closer to Humans Than Stegosaurus",
-   "id": "20261127-153011-loop",
+   "title": "Anglo-Zanzibar War 1896: The Shortest War in History",
+   "id": "20261128-151215-loop",
    "error": ""
   }
  },
  "videos": {
   "waiting": [
+   {
+    "id": "20261128-151215-loop",
+    "kind": "loop",
+    "title": "Anglo-Zanzibar War 1896: The Shortest War in History",
+    "topic": "The shortest war in history lasted under an hour (Anglo-Zanzibar War, 1896)",
+    "series": "Timeline Twists",
+    "format": "one-fact",
+    "status": "waiting",
+    "made": "2026-11-28T15:12:49.443887+05:30",
+    "seconds": 18,
+    "usd": 0.0,
+    "engine": "free AI pictures",
+    "video_id": null,
+    "published": null,
+    "why": "High mystery and tight curiosity hook that pays off immediately with a precise 38-minute loopable narrative",
+    "warnings": [
+     "shot 2 reused a neighbouring shot",
+     "18 s is long for a loop (aim 5-12 s)"
+    ],
+    "description": "The Anglo-Zanzibar War of 1896 remains the shortest recorded war in history. On August 27, 1896, Sultan Khalid bin Barghash seized power in Zanzibar Town without British approval, barricading 2,800 men inside the seafront palace complex. Royal Navy warships under Rear-Admiral Harry Rawson opened fire at 09:02 AM, sinking the royal yacht HHS Glasgow and ending the entire conflict by 09:46 AM. Could any modern military conflict ever end this quickly?\n\nNew history movies every Wednesday and Sunday on History with Me.\n\nSources\n- Anglo-Zanzibar War: https://en.wikipedia.org/wiki/Anglo-Zanzibar_War\n\nNarration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing.\n\n#history #shorts #AngloZanzibarWar #historyfacts",
+    "tags": [
+     "anglo-zanzibar war",
+     "anglo zanzibar war 1896",
+     "shortest war in history",
+     "what was the shortest war in history",
+     "how long did the anglo zanzibar war last",
+     "why did the anglo zanzibar war happen",
+     "sultan khalid bin barghash",
+     "harry rawson",
+     "zanzibar 1896",
+     "british empire history",
+     "history",
+     "history facts",
+     "weird history",
+     "history shorts",
+     "history stories",
+     "history with me"
+    ],
+    "pinned_comment": "If you were in Sultan Khalid's shoes, would you have stepped down before the warships opened fire?",
+    "public": "",
+    "release": 461450106,
+    "assets": {
+     "video.mp4": 804034685
+    }
+   },
+   {
+    "id": "20261128-150606-story",
+    "kind": "story",
+    "title": "Quetzalcoatlus: How a Giraffe-Sized Monster Flew",
+    "topic": "Quetzalcoatlus: The Giraffe-Sized Monster That Ruled the Skies",
+    "series": "Prehistoric Giants",
+    "format": "trailer",
+    "status": "waiting",
+    "made": "2026-11-28T15:11:05.953372+05:30",
+    "seconds": 26,
+    "usd": 0.0,
+    "engine": "free AI video",
+    "video_id": null,
+    "published": null,
+    "why": "Combines massive prehistoric scale with a mind-bending biomechanics puzzle in a high-tension trailer format.",
+    "warnings": [
+     "free AI video is used up for today",
+     "AI video unavailable (AI video unavailable: 429: {\"error\":{\"message\":\"Rate limit exceeded for model gemini-omni-1.2-flash (limit: 0 input tokens per minute on F",
+     "1 shot(s) used pictures with camera moves (no AI video left for them)"
+    ],
+    "description": "How Quetzalcoatlus flight worked has fascinated paleontologists since 1971. Discovered in Big Bend National Park, Texas, by Douglas Lawson, this giant azhdarchid pterosaur lived during the Late Cretaceous period. Biomechanical models show it launched quadrupedally by vaulting off powerful wing muscles rather than running. Could a creature this massive survive in modern skies?\n\nNew history movies every Wednesday and Sunday on History with Me.\n\nSources\n- Quetzalcoatlus: https://en.wikipedia.org/wiki/Quetzalcoatlus\n\nNarration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing.\n\n#history #shorts #quetzalcoatlus #prehistoric",
+    "tags": [
+     "Quetzalcoatlus",
+     "Quetzalcoatlus northropi",
+     "Quetzalcoatl pterosaur",
+     "how did quetzalcoatlus fly",
+     "largest flying animal ever",
+     "how big was quetzalcoatlus",
+     "Douglas Lawson",
+     "Big Bend Texas",
+     "Late Cretaceous",
+     "pterosaur",
+     "prehistoric giants",
+     "history",
+     "history facts",
+     "weird history",
+     "history shorts",
+     "prehistoric animals",
+     "dinosaurs",
+     "paleontology",
+     "history with me"
+    ],
+    "pinned_comment": "Would you rather see a Quetzalcoatlus walk on land or watch it vault into the air?",
+    "public": "",
+    "release": 461449153,
+    "assets": {
+     "video.mp4": 804029667
+    }
+   },
    {
     "id": "20261127-153011-loop",
     "kind": "loop",
@@ -132,12 +226,6 @@
  "ideas": {
   "story": [
    {
-    "topic": "Quetzalcoatlus, the flying reptile as tall as a giraffe",
-    "series": "Prehistoric Giants",
-    "source": "plan",
-    "date": "2026-11-27"
-   },
-   {
     "topic": "POV: You're a baby Tyrannosaurus, 67 million years ago",
     "series": "Prehistoric Giants",
     "source": "plan",
@@ -166,6 +254,12 @@
     "series": "Timeline Twists",
     "source": "plan",
     "date": "2026-11-30"
+   },
+   {
+    "topic": "The Terracotta Army was found by farmers digging a well",
+    "series": "Dig Discoveries",
+    "source": "plan",
+    "date": "2026-11-30"
    }
   ],
   "loop": [
@@ -188,8 +282,8 @@
     "date": ""
    },
    {
-    "topic": "The shortest war in history lasted under an hour (Anglo-Zanzibar War, 1896)",
-    "series": "Timeline Twists",
+    "topic": "You cannot see the Great Wall of China from space with the naked eye",
+    "series": "Myth Busters",
     "source": "plan",
     "date": ""
    }

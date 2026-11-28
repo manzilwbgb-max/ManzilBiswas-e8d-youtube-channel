@@ -1,0 +1,66 @@
+{
+ "id": "20261128-151215-loop",
+ "kind": "loop",
+ "title": "Anglo-Zanzibar War 1896: The Shortest War in History",
+ "description": "The Anglo-Zanzibar War of 1896 remains the shortest recorded war in history. On August 27, 1896, Sultan Khalid bin Barghash seized power in Zanzibar Town without British approval, barricading 2,800 men inside the seafront palace complex. Royal Navy warships under Rear-Admiral Harry Rawson opened fire at 09:02 AM, sinking the royal yacht HHS Glasgow and ending the entire conflict by 09:46 AM. Could any modern military conflict ever end this quickly?\n\nNew history movies every Wednesday and Sunday on History with Me.\n\nSources\n- Anglo-Zanzibar War: https://en.wikipedia.org/wiki/Anglo-Zanzibar_War\n\nNarration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing.\n\n#history #shorts #AngloZanzibarWar #historyfacts",
+ "tags": [
+  "anglo-zanzibar war",
+  "anglo zanzibar war 1896",
+  "shortest war in history",
+  "what was the shortest war in history",
+  "how long did the anglo zanzibar war last",
+  "why did the anglo zanzibar war happen",
+  "sultan khalid bin barghash",
+  "harry rawson",
+  "zanzibar 1896",
+  "british empire history",
+  "history",
+  "history facts",
+  "weird history",
+  "history shorts",
+  "history stories",
+  "history with me"
+ ],
+ "pinned_comment": "If you were in Sultan Khalid's shoes, would you have stepped down before the warships opened fire?",
+ "series": "Timeline Twists",
+ "format": "one-fact",
+ "topic": "The shortest war in history lasted under an hour (Anglo-Zanzibar War, 1896)",
+ "idea": "l05-shortest-war",
+ "idea_source": "plan",
+ "why": "High mystery and tight curiosity hook that pays off immediately with a precise 38-minute loopable narrative",
+ "made": "2026-11-28T15:12:49.443887+05:30",
+ "duration": 18.2,
+ "status": "waiting",
+ "caption": "🎬 <b>Loop Short ready</b> · 18 s · Timeline Twists\n<b>Anglo-Zanzibar War 1896: The Shortest War in History</b>\nHook: “The war that ended in 38 minutes (1896)”\nWhy now: High mystery and tight curiosity hook that pays off immediately with a precise 38-minute loopable narrative\nFact check: high (2 fixes) · source: Anglo-Zanzibar War\nFormat: loop · Shots: 1 free AI picture · Voice: gemini\n⚠️ shot 2 reused a neighbouring shot\n⚠️ 18 s is long for a loop (aim 5-12 s)\nYouTube isn't connected yet: save this video and upload it from the YouTube app, then tap ✅.",
+ "fact_check": {
+  "changes": [
+   "Hedged war duration in Scene 1 to 'thirty-eight to forty-five minutes' as the source specifies it lasted between 38 and 45 minutes.",
+   "Updated Scene 2 to specify 'suffered casualties' instead of 'fell' to accurately reflect the source's detail of 500 total casualties (killed and wounded)."
+  ],
+  "confidence": "high"
+ },
+ "sources": [
+  {
+   "title": "Anglo-Zanzibar War",
+   "url": "https://en.wikipedia.org/wiki/Anglo-Zanzibar_War"
+  }
+ ],
+ "warnings": [
+  "shot 2 reused a neighbouring shot",
+  "18 s is long for a loop (aim 5-12 s)"
+ ],
+ "pictures": {
+  "free_ai": 1
+ },
+ "video_usd": 0.0,
+ "release": {
+  "id": 461450106,
+  "assets": {
+   "video.mp4": 804034685
+  },
+  "links": {
+   "video.mp4": "https://github.com/manzilwbgb-max/ManzilBiswas-e8d-youtube-channel/releases/download/untagged-800a10ec84f6d3ff3087/video.mp4"
+  }
+ },
+ "message_id": 41
+}

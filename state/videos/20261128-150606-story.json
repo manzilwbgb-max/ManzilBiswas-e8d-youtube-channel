@@ -1,0 +1,70 @@
+{
+ "id": "20261128-150606-story",
+ "kind": "story",
+ "title": "Quetzalcoatlus: How a Giraffe-Sized Monster Flew",
+ "description": "How Quetzalcoatlus flight worked has fascinated paleontologists since 1971. Discovered in Big Bend National Park, Texas, by Douglas Lawson, this giant azhdarchid pterosaur lived during the Late Cretaceous period. Biomechanical models show it launched quadrupedally by vaulting off powerful wing muscles rather than running. Could a creature this massive survive in modern skies?\n\nNew history movies every Wednesday and Sunday on History with Me.\n\nSources\n- Quetzalcoatlus: https://en.wikipedia.org/wiki/Quetzalcoatlus\n\nNarration voice and pictures are AI-generated. The script is researched from the sources above and reviewed by the creator before publishing.\n\n#history #shorts #quetzalcoatlus #prehistoric",
+ "tags": [
+  "Quetzalcoatlus",
+  "Quetzalcoatlus northropi",
+  "Quetzalcoatl pterosaur",
+  "how did quetzalcoatlus fly",
+  "largest flying animal ever",
+  "how big was quetzalcoatlus",
+  "Douglas Lawson",
+  "Big Bend Texas",
+  "Late Cretaceous",
+  "pterosaur",
+  "prehistoric giants",
+  "history",
+  "history facts",
+  "weird history",
+  "history shorts",
+  "prehistoric animals",
+  "dinosaurs",
+  "paleontology",
+  "history with me"
+ ],
+ "pinned_comment": "Would you rather see a Quetzalcoatlus walk on land or watch it vault into the air?",
+ "series": "Prehistoric Giants",
+ "format": "trailer",
+ "topic": "Quetzalcoatlus: The Giraffe-Sized Monster That Ruled the Skies",
+ "idea": "s01-quetzalcoatlus",
+ "idea_source": "plan",
+ "why": "Combines massive prehistoric scale with a mind-bending biomechanics puzzle in a high-tension trailer format.",
+ "made": "2026-11-28T15:11:05.953372+05:30",
+ "duration": 25.8,
+ "status": "waiting",
+ "caption": "🎬 <b>Story Short ready</b> · 26 s · Prehistoric Giants\n<b>Quetzalcoatlus: How a Giraffe-Sized Monster Flew</b>\nHook: “POV: A 500lb monster vaults into the sky”\nWhy now: Combines massive prehistoric scale with a mind-bending biomechanics puzzle in a high-tension trailer format.\nFact check: high (1 fixes) · source: Quetzalcoatlus\nFormat: trailer · Shots: 2 free AI video, 1 free AI picture · Voice: gemini\n⚠️ free AI video is used up for today\n⚠️ AI video unavailable (AI video unavailable: 429: {\"error\":{\"message\":\"Rate limit exceeded for model gemini-omni-1.2-flash (limit: 0 input tokens per minute on Fre)\n⚠️ 1 shot(s) used pictures with camera moves (no AI video left for them)\nYouTube isn't connected yet: save this video and upload it from the YouTube app, then tap ✅.",
+ "fact_check": {
+  "changes": [
+   "Hedged the claim in Scene 3 from 'the largest flying animal in history' to 'arguably the largest flying animal in history' to accurately reflect that paleontology recognizes Quetzalcoatlus northropi as a candidate for the title due to fragmentary fossil evidence."
+  ],
+  "confidence": "high"
+ },
+ "sources": [
+  {
+   "title": "Quetzalcoatlus",
+   "url": "https://en.wikipedia.org/wiki/Quetzalcoatlus"
+  }
+ ],
+ "warnings": [
+  "free AI video is used up for today",
+  "AI video unavailable (AI video unavailable: 429: {\"error\":{\"message\":\"Rate limit exceeded for model gemini-omni-1.2-flash (limit: 0 input tokens per minute on Fre)",
+  "1 shot(s) used pictures with camera moves (no AI video left for them)"
+ ],
+ "pictures": {
+  "free_video": 2,
+  "free_ai": 1
+ },
+ "video_usd": 0.0,
+ "release": {
+  "id": 461449153,
+  "assets": {
+   "video.mp4": 804029667
+  },
+  "links": {
+   "video.mp4": "https://github.com/manzilwbgb-max/ManzilBiswas-e8d-youtube-channel/releases/download/untagged-e9e5a5a4edf6c5ae1310/video.mp4"
+  }
+ },
+ "message_id": 39
+}
